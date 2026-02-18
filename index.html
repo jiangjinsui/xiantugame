@@ -1349,143 +1349,163 @@ document.querySelectorAll('[data-msg-act]').forEach(btn=>{btn.addEventListener('
 // 弹窗关闭
 document.querySelectorAll('.modal-mask').forEach(m=>{m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')})});
 
-// ========== 定时器 ==========
-// 灵力恢复（30秒）
-setInterval(()=>{
-  if(state.player.mp<state.player.maxMp){
-    state.player.mp=Math.min(state.player.maxMp,state.player.mp+5);
-    save();updatePlayerUI();
-  }
-},30000);
-
-// NPC自主行为+八卦（1小时）
-setInterval(()=>{
-  npcAutonomyTick();
-  npcGossipTick();
-  loveDecayTick();
-},3600000);
-
-// 随机事件（90秒30%概率）
-setInterval(()=>{
-  if(Math.random()<0.3&&state.npcs.length>0){
-    // 30%概率是情敌事件，70%普通事件
-    if(Math.random()<0.3&&state.npcs.length>0){
-      triggerRivalEvent();
-    }else{
-      triggerRandomEvent();
-    }
-  }
-},90000);
-
-// ========== 初始化 ==========
-loadSettings();
-refreshAll();
-// 初始化所有NPC的社交圈
-state.npcs.forEach(n=>ensureSocialCircle(n.id));
-
 // ========== NPC社交网系统 ==========
-// 路人修士名字库
 const RANDOM_NAMES_MALE=['沈清辞','顾长歌','萧无衍','裴渊','楚夜辰','温如玉','凌霄','白子墨','叶知秋','苏慕白','江晚吟','陆九渊','谢无期','柳随风','宋明澈'];
 const RANDOM_NAMES_FEMALE=['云绾绾','柳如烟','苏挽月','沈星落','顾清欢','花千骨','凤九','白浅','洛璃','姜雨晴','林婉儿','慕容紫英','上官婉儿','萧薰儿','纳兰嫣然'];
 const FRIEND_ACTIVITIES=['喝茶','切磋剑法','一起炼丹','逛坊市','讨论功法','赏花','下棋','一起修炼','闲聊','品酒'];
 const AMBIGUOUS_ACTIVITIES=['月下散步','并肩看星星','互喂灵果','靠在肩上小憩','牵手逛夜市','对视发呆','整理衣领','擦拭嘴角'];
 
-// 初始化NPC社交圈
 function ensureSocialCircle(npcId){
   if(!state.socialNet)state.socialNet={};
-  if(!state.socialNet[npcId]){
-    const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return;
-    const pool=npc.gender==='女'?RANDOM_NAMES_MALE:RANDOM_NAMES_FEMALE;
-    const mixed=npc.gender==='女'?RANDOM_NAMES_FEMALE:RANDOM_NAMES_MALE;
-    // 生成2-4个好友
-    const friends=[];
-    const count=2+Math.floor(Math.random()*3);
-    const used=new Set();
-    for(let i=0;i<count;i++){
-      const fromPool=Math.random()<0.7?pool:mixed;
-      let name;
-      do{name=fromPool[Math.floor(Math.random()*fromPool.length)]}while(used.has(name));
-      used.add(name);
-      friends.push({
-        name,
-        gender:pool.includes(name)?( npc.gender==='女'?'男':'女'):(npc.gender==='女'?'女':'男'),
-        realm:REALMS[2+Math.floor(Math.random()*5)],
-        relation:Math.random()<0.15?'暧昧':'好友', // 15%概率有暧昧好友
-        closeness:Math.floor(Math.random()*60)+20 // 20-80亲密度
-      });
-    }
-    state.socialNet[npcId]={friends,rivals:[],lastGossip:0};
-    save();
-  }
+  if(state.socialNet[npcId])return state.socialNet[npcId];
+  // 先给个空的，防止重复调用
+  state.socialNet[npcId]={friends:[],rivals:[],lastGossip:0,generated:false};
+  save();
   return state.socialNet[npcId];
 }
 
-// 生成NPC当前活动场景（查岗用）
+async function aiGenerateSocialCircle(npcId){
+  const social=ensureSocialCircle(npcId);
+  if(social.generated&&social.friends.length)return social;
+  if(!state.api.url||!state.api.key)return social;
+  const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return social;
+
+  const prompt=`你是修仙世界设定生成器。请为角色「${npc.name}」（${npc.gender}·${npc.realm}·${npc.role||'散修'}·性格：${npc.personality?.slice(0,50)||'未知'}）生成2-4个社交圈好友。
+要求：
+- 名字要有仙侠风格，不要太常见
+- 每个好友要有鲜明特点
+- 其中可以有1个跟${npc.name}关系暧昧的（异性为主）
+- 简短描述外貌和性格特点
+
+严格按JSON格式返回，不要有其他内容：
+[{"name":"名字","gender":"男或女","realm":"境界","relation":"好友或暧昧","personality":"一句话外貌性格（20字内）","closeness":亲密度数字20到80}]`;
+
+  try{
+    const r=await fetch(getApiUrl(),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.api.key},
+      body:JSON.stringify({model:state.api.model,messages:[{role:'user',content:prompt}],max_tokens:500,temperature:1.0})});
+    if(!r.ok)throw new Error(r.status);
+    const d=await r.json(),reply=d.choices?.[0]?.message?.content||'';
+    const jsonMatch=reply.match(/\[[\s\S]*\]/);
+    if(jsonMatch){
+      const friends=JSON.parse(jsonMatch[0]);
+      social.friends=friends.map(f=>({
+        name:f.name||'无名',
+        gender:f.gender||'男',
+        realm:f.realm||'金丹期',
+        relation:f.relation||'好友',
+        personality:f.personality||'',
+        closeness:f.closeness||50
+      }));
+      social.generated=true;
+      save();
+    }
+  }catch(e){
+    console.log('生成社交圈失败:',e);
+    // 失败了就用简单的备用
+    if(!social.friends.length){
+      social.friends=[
+        {name:'某修士',gender:npc.gender==='女'?'男':'女',realm:'金丹期',relation:'好友',personality:'普通修士',closeness:40}
+      ];
+      save();
+    }
+  }
+  return social;
+}
+
 function generateNpcScene(npcId){
   const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return null;
   const social=ensureSocialCircle(npcId);
   const rel=state.relations[npcId]||{love:0,type:'陌生人'};
   const roll=Math.random();
-  
-  // 独处
   if(roll<0.3||!social.friends.length){
     const soloActs=['独自修炼','在洞府看书','对着月亮发呆','在炼丹','整理法器',
-      rel.love>=60?`看着你送的灵花发呆`:'',
-      rel.love>=70?`翻看和你的传讯记录`:'',
-      rel.love>=80?`抱着你留下的外衣入睡`:''].filter(Boolean);
+      rel.love>=60?'看着你送的灵花发呆':'',
+      rel.love>=70?'翻看和你的传讯记录':'',
+      rel.love>=80?'抱着你留下的外衣入睡':''].filter(Boolean);
     return {type:'solo',desc:soloActs[Math.floor(Math.random()*soloActs.length)]};
   }
-  
-  // 跟好友在一起
   if(roll<0.7){
     const friend=social.friends[Math.floor(Math.random()*social.friends.length)];
     const act=FRIEND_ACTIVITIES[Math.floor(Math.random()*FRIEND_ACTIVITIES.length)];
-    return {type:'friend',friend,activity:act,desc:`正在和${friend.name}（${friend.gender}·${friend.realm}·${friend.relation}）${act}`};
+    return {type:'friend',friend,activity:act,desc:`正在和${friend.name}（${friend.gender}·${friend.realm}·${friend.relation}${friend.personality?'·'+friend.personality:''}）${act}`};
   }
-  
-  // 跟暧昧对象在一起（修罗场！）
   const ambFriends=social.friends.filter(f=>f.relation==='暧昧');
   if(ambFriends.length&&roll<0.85){
     const friend=ambFriends[Math.floor(Math.random()*ambFriends.length)];
     const act=AMBIGUOUS_ACTIVITIES[Math.floor(Math.random()*AMBIGUOUS_ACTIVITIES.length)];
-    return {type:'ambiguous',friend,activity:act,desc:`正在和${friend.name}（${friend.gender}·${friend.realm}）${act}`,suspicious:true};
+    return {type:'ambiguous',friend,activity:act,desc:`正在和${friend.name}（${friend.gender}·${friend.personality||''}）${act}`,suspicious:true};
   }
-  
-  // 被搭讪
-  if(roll<0.95){
-    const isOppGender=npc.gender==='女'?RANDOM_NAMES_MALE:RANDOM_NAMES_FEMALE;
-    const stranger=isOppGender[Math.floor(Math.random()*isOppGender.length)];
-    return {type:'approached',stranger,desc:`被一个叫${stranger}的修士搭讪中`,suspicious:true};
+  if(roll<0.95&&social.friends.length){
+    // 被社交圈外的人搭讪，用好友的异性名字变体
+    const stranger=npc.gender==='女'?'某男修士':'某女修士';
+    return {type:'approached',stranger,desc:`被${stranger}搭讪中`,suspicious:true};
   }
-  
   return {type:'solo',desc:'在洞府修炼'};
 }
 
-// 增强版查岗（替换原来的viewStatus里的callAIModal）
 async function enhancedCheck(id){
   const npc=state.npcs.find(n=>n.id===id);if(!npc)return;
-  const scene=generateNpcScene(id);
   const rel=state.relations[id]||{love:0};
-  
+
   document.getElementById('checkTitle').textContent=`🔍 偷看${npc.name}`;
   const el=document.getElementById('checkContent');
   document.getElementById('checkModal').classList.add('show');
-  
-  // 先显示场景
-  let sceneHtml=`<div style="padding:10px;background:rgba(160,112,224,.06);border:1px solid rgba(160,112,224,.12);border-radius:8px;margin-bottom:12px">`;
-  sceneHtml+=`<div style="font-size:11px;color:var(--dim)">你悄悄探出灵识…</div>`;
-  sceneHtml+=`<div style="font-size:13px;margin-top:6px;color:var(--text)">${npc.name}${scene.desc}</div>`;
-  
+  el.innerHTML='<div style="color:var(--dim);font-size:11px">灵识探出中…</div>';
+
+  // 先确保社交圈已生成
+  const social=ensureSocialCircle(id);
+  if(!social.generated||!social.friends.length){
+    el.innerHTML='<div style="color:var(--dim);font-size:11px">正在探查社交圈…</div>';
+    await aiGenerateSocialCircle(id);
+  }
+
+  const scene=generateNpcScene(id);
+
+  // 用AI详细描写场景
+  let scenePrompt='';
+  if(scene.type==='ambiguous'){
+    scenePrompt=`（第三人称，200字）描写${npc.name}正在和${scene.friend.name}（${scene.friend.gender}·${scene.friend.personality||''}）${scene.activity}的场景。要有环境描写、两人的神态、动作细节、暧昧氛围。${scene.friend.name}对${npc.name}明显有好感。`;
+  }else if(scene.type==='approached'){
+    scenePrompt=`（第三人称，200字）描写${npc.name}正在被一个叫${scene.stranger}的修士搭讪的场景。要有环境描写、${scene.stranger}的外貌举止、${npc.name}的神态反应。根据${npc.name}的性格（好感${rel.love}）决定ta是冷淡拒绝还是礼貌应对。`;
+  }else if(scene.type==='friend'){
+    scenePrompt=`（第三人称，200字）描写${npc.name}正在和好友${scene.friend.name}（${scene.friend.gender}·${scene.friend.personality||''}）${scene.activity}的场景。要有环境描写、两人的对话、神态。气氛轻松友好。`;
+  }else{
+    scenePrompt=`（第三人称，200字）描写${npc.name}独处时${scene.desc}的场景。要有环境描写、神态、内心活动。${rel.love>=60?'ta心里想着'+state.player.name:''}`;
+  }
+
+  // 调AI生成详细场景
+  let detailedScene='';
+  if(state.api.url&&state.api.key){
+    try{
+      const msgs=[{role:'system',content:buildSys(npc,'status')},{role:'user',content:scenePrompt}];
+      const r=await fetch(getApiUrl(),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.api.key},
+        body:JSON.stringify({model:state.api.model,messages:msgs,max_tokens:600,temperature:.9})});
+      if(r.ok){
+        const d=await r.json();
+        detailedScene=d.choices?.[0]?.message?.content||'';
+      }
+    }catch(e){console.log('场景生成失败:',e)}
+  }
+
+  // 显示场景
+  let sceneHtml=`<div style="padding:12px;background:rgba(160,112,224,.06);border:1px solid rgba(160,112,224,.12);border-radius:8px;margin-bottom:12px">`;
+  sceneHtml+=`<div style="font-size:11px;color:var(--dim);margin-bottom:6px">你悄悄探出灵识…</div>`;
+  if(detailedScene){
+    sceneHtml+=`<div style="font-size:12px;line-height:1.8;color:var(--text)">${esc(detailedScene)}</div>`;
+  }else{
+    sceneHtml+=`<div style="font-size:13px;color:var(--text)">${npc.name}${scene.desc}</div>`;
+  }
   if(scene.suspicious){
     sceneHtml+=`<div style="margin-top:8px;color:var(--danger);font-size:11px">⚠️ 看起来有点可疑…</div>`;
   }
   sceneHtml+=`</div>`;
-  
+
   // 选项
   let choicesHtml='<div style="display:flex;flex-direction:column;gap:6px">';
   if(scene.type==='ambiguous'||scene.type==='approached'){
-    choicesHtml+=`<button class="event-choice" onclick="checkConfront('${id}','${scene.friend?.name||scene.stranger}')">😤 冲过去质问</button>`;
-    choicesHtml+=`<button class="event-choice" onclick="checkWatch('${id}','${scene.friend?.name||scene.stranger}')">👀 继续偷看</button>`;
+    const targetName=scene.friend?.name||scene.stranger;
+    choicesHtml+=`<button class="event-choice" onclick="checkConfront('${id}','${targetName}')">😤 冲过去质问</button>`;
+    choicesHtml+=`<button class="event-choice" onclick="checkWatch('${id}','${targetName}')">👀 继续偷看</button>`;
     choicesHtml+=`<button class="event-choice" onclick="checkLeave('${id}')">😢 默默离开</button>`;
   }else if(scene.type==='friend'){
     choicesHtml+=`<button class="event-choice" onclick="checkJoin('${id}','${scene.friend.name}')">👋 过去打招呼</button>`;
@@ -1497,7 +1517,7 @@ async function enhancedCheck(id){
     choicesHtml+=`<button class="event-choice" onclick="checkLeave('${id}')">🚶 不打扰了</button>`;
   }
   choicesHtml+='</div>';
-  
+
   el.innerHTML=sceneHtml+choicesHtml+'<div id="checkAIResult" style="margin-top:12px"></div>';
 }
 
@@ -1506,18 +1526,11 @@ async function checkConfront(npcId,rivalName){
   const rel=state.relations[npcId];
   const el=document.getElementById('checkAIResult');
   document.querySelectorAll('#checkContent .event-choice').forEach(b=>b.disabled=true);
-  
   addEvent('修罗场',`你冲过去质问${npc.name}和${rivalName}的关系！`);
-  
-  // 根据好感决定结果
   const prompt=`*${state.player.name}突然出现，看到你和${rivalName}在一起，表情不太好看*\n"${npc.name}，你在干什么？这个${rivalName}是谁？"\n（请根据好感度${rel.love}和你的性格回应。好感高则解释安慰，好感低则可能不耐烦。要描写${rivalName}的反应。）`;
-  
   if(!state.chatHistories[npcId])state.chatHistories[npcId]=[];
   state.chatHistories[npcId].push({role:'user',content:prompt});
-  
   await callAIModal(npc,'face',el);
-  
-  // 好感变化
   if(rel.love>=70){rel.love=Math.min(100,rel.love+3);floatNum('❤️+3（解释清楚了）','var(--green)',window.innerWidth/2,window.innerHeight*0.3)}
   else if(rel.love>=40){floatNum('😅 有点尴尬','var(--orange)',window.innerWidth/2,window.innerHeight*0.3)}
   else{rel.love=Math.max(0,rel.love-5);floatNum('💔-5（嫌你多管闲事）','var(--danger)',window.innerWidth/2,window.innerHeight*0.3)}
@@ -1528,12 +1541,25 @@ async function checkWatch(npcId,targetName){
   const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return;
   const el=document.getElementById('checkAIResult');
   document.querySelectorAll('#checkContent .event-choice').forEach(b=>b.disabled=true);
-  
+  el.innerHTML='<div style="color:var(--dim)">继续偷看中…</div>';
+
+  const social=state.socialNet?.[npcId];
+  const friendInfo=social?.friends?.find(f=>f.name===targetName);
+  const friendDesc=friendInfo?`（${friendInfo.gender}·${friendInfo.personality||''}·与${npc.name}${friendInfo.relation}）`:'';
+
   const prompt=targetName?
-    `（第三人称描述${npc.name}和${targetName}接下来的互动。200字。要有细节和对话。如果${targetName}对${npc.name}有暧昧举动，描写${npc.name}的反应。）`:
-    `（第三人称描述${npc.name}独处时的样子。200字。要有内心活动。）`;
-  
-  await callAIModal(npc,'status',el);
+    `（第三人称，300字，要非常详细）你继续偷看${npc.name}和${targetName}${friendDesc}。描写接下来的互动：对话内容、表情变化、肢体动作、氛围。${friendInfo?.relation==='暧昧'?targetName+'对'+npc.name+'有明显的暧昧举动，描写'+npc.name+'的微妙反应。':'两人关系正常，但要有生动的互动细节。'}`:
+    `（第三人称，300字，要非常详细）你继续偷看${npc.name}独处。描写ta的动作、表情、内心独白。${state.relations[npcId]?.love>=50?'ta不经意间想起了'+state.player.name+'，神色有了微妙变化。':''}`;
+
+  const msgs=[{role:'system',content:buildSys(npc,'status')},{role:'user',content:prompt}];
+  try{
+    const r=await fetch(getApiUrl(),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.api.key},
+      body:JSON.stringify({model:state.api.model,messages:msgs,max_tokens:800,temperature:.9})});
+    if(!r.ok)throw new Error(r.status);
+    const d=await r.json(),reply=d.choices?.[0]?.message?.content||'（看不清了…）';
+    el.innerHTML=`<div style="font-size:12px;line-height:1.8">${esc(reply)}</div>`;
+    parseReply(npcId,reply);save();refreshAll();
+  }catch(e){el.innerHTML=`<span style="color:var(--danger)">灵识被干扰了：${e.message}</span>`}
 }
 
 async function checkJoin(npcId,friendName){
@@ -1541,12 +1567,9 @@ async function checkJoin(npcId,friendName){
   const rel=state.relations[npcId];
   const el=document.getElementById('checkAIResult');
   document.querySelectorAll('#checkContent .event-choice').forEach(b=>b.disabled=true);
-  
   const prompt=`*${state.player.name}走过来打招呼* "嗨~你们在干嘛呀？"\n（${npc.name}看到${state.player.name}来了，根据好感度${rel.love}反应。同时描写${friendName}的反应。）`;
-  
   if(!state.chatHistories[npcId])state.chatHistories[npcId]=[];
   state.chatHistories[npcId].push({role:'user',content:prompt});
-  
   await callAIModal(npc,'face',el);
   rel.love=Math.min(100,rel.love+2);
   floatNum('❤️+2','var(--pink)',window.innerWidth/2,window.innerHeight*0.3);
@@ -1558,12 +1581,9 @@ async function checkSurprise(npcId){
   const rel=state.relations[npcId];
   const el=document.getElementById('checkAIResult');
   document.querySelectorAll('#checkContent .event-choice').forEach(b=>b.disabled=true);
-  
   const prompt=`*${state.player.name}突然从背后出现，捂住${npc.name}的眼睛* "猜猜我是谁～"`;
-  
   if(!state.chatHistories[npcId])state.chatHistories[npcId]=[];
   state.chatHistories[npcId].push({role:'user',content:prompt});
-  
   await callAIModal(npc,'face',el);
   if(rel.love>=50){rel.love=Math.min(100,rel.love+3);floatNum('❤️+3','var(--pink)',window.innerWidth/2,window.innerHeight*0.3)}
   else{rel.love=Math.max(0,rel.love-2);floatNum('💔-2（被吓到了）','var(--danger)',window.innerWidth/2,window.innerHeight*0.3)}
@@ -1589,47 +1609,33 @@ const RIVAL_EVENTS=[
 
 function triggerRivalEvent(){
   if(!state.npcs.length)return;
-  // 选一个NPC
   const candidates=state.npcs.filter(n=>{
     const rel=state.relations[n.id];
-    return rel&&rel.love<85; // 好感85以上不会被撬
+    return rel&&rel.love<85;
   });
   if(!candidates.length)return;
-  
   const npc=candidates[Math.floor(Math.random()*candidates.length)];
   const rel=state.relations[npc.id];
   const social=ensureSocialCircle(npc.id);
-  
-  // 生成情敌
   const rivalPool=npc.gender==='女'?RANDOM_NAMES_MALE:RANDOM_NAMES_FEMALE;
   let rivalName;
-  // 优先从暧昧好友里选
   const ambFriend=social.friends.find(f=>f.relation==='暧昧');
   if(ambFriend&&Math.random()<0.6){
     rivalName=ambFriend.name;
   }else{
     rivalName=rivalPool[Math.floor(Math.random()*rivalPool.length)];
   }
-  
   const evt=RIVAL_EVENTS[Math.floor(Math.random()*RIVAL_EVENTS.length)];
   const desc=evt.template(npc,rivalName);
-  
-  // 记录情敌
   if(!social.rivals.includes(rivalName))social.rivals.push(rivalName);
   save();
-  
   showEventModal({
     title:`⚡ ${evt.title}`,
     desc:desc,
     choices:[
-      {text:'😤 立刻去找ta！',action:()=>{
-        rivalConfront(npc.id,rivalName);
-      }},
-      {text:`📨 传讯问${npc.name}`,action:()=>{
-        rivalAsk(npc.id,rivalName);
-      }},
+      {text:'😤 立刻去找ta！',action:()=>{rivalConfront(npc.id,rivalName)}},
+      {text:`📨 传讯问${npc.name}`,action:()=>{rivalAsk(npc.id,rivalName)}},
       {text:'😒 装作不知道',action:()=>{
-        // 好感可能降低
         if(rel.love>=50&&Math.random()<0.3){
           rel.love=Math.max(0,rel.love-3);
           floatNum('💔-3（ta有点失望你不在意）','var(--danger)',window.innerWidth/2,window.innerHeight*0.3);
@@ -1644,15 +1650,10 @@ function triggerRivalEvent(){
 async function rivalConfront(npcId,rivalName){
   const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return;
   const rel=state.relations[npcId];
-  
   addEvent('修罗场',`你去找${rivalName}理论！`);
   startChat(npcId);
-  
   const confrontText=`*你找到${npc.name}，发现${rivalName}也在。你走上前，挡在${npc.name}面前，冷冷看着${rivalName}*\n"${rivalName}是吧？离${npc.name}远点。"`;
-  
   await sendChat(confrontText);
-  
-  // 好感变化取决于当前关系
   if(rel.love>=60){
     rel.love=Math.min(100,rel.love+5);
     floatNum('❤️+5（被你护住很开心）','var(--pink)',window.innerWidth/2,window.innerHeight*0.3);
@@ -1668,14 +1669,11 @@ async function rivalConfront(npcId,rivalName){
 
 async function rivalAsk(npcId,rivalName){
   const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return;
-  
   currentMsgId=npcId;
   document.getElementById('msgSelect').value=npcId;
   switchPage('interact');
-  // 切到传讯tab
   document.querySelector('[data-sub="msg"]').click();
   loadMsgChat();
-  
   const askText=`${npc.name}…我听说${rivalName}对你…你们什么关系？`;
   await sendRemote(askText);
 }
@@ -1683,17 +1681,13 @@ async function rivalAsk(npcId,rivalName){
 // ========== NPC八卦系统 ==========
 function npcGossipTick(){
   if(state.npcs.length<2)return;
-  
   state.npcs.forEach(npc=>{
     const rel=state.relations[npc.id];if(!rel||rel.love<40)return;
-    if(Math.random()>0.2)return; // 20%概率八卦
-    
-    // 找另一个NPC
+    if(Math.random()>0.2)return;
     const others=state.npcs.filter(n=>n.id!==npc.id&&(state.relations[n.id]?.love||0)>=30);
     if(!others.length)return;
     const other=others[Math.floor(Math.random()*others.length)];
     const otherRel=state.relations[other.id];
-    
     const gossips=[
       `${npc.name}传讯问你："你和${other.name}…是什么关系？"`,
       `${npc.name}说："我今天碰到${other.name}了，ta问了好多关于你的事…"`,
@@ -1701,13 +1695,10 @@ function npcGossipTick(){
       rel.love>=70?`${npc.name}小声说："${other.name}是不是也喜欢你…我有点不安。"`:'',
       otherRel.love>=60?`${npc.name}说："${other.name}好像对你有意思，你知道吗？"`:'',
     ].filter(Boolean);
-    
     if(!gossips.length)return;
     const msg=gossips[Math.floor(Math.random()*gossips.length)];
-    
     if(!state.msgHistories[npc.id])state.msgHistories[npc.id]=[];
     state.msgHistories[npc.id].push({role:'assistant',content:msg});
-    
     showToast(`📨 ${npc.name}：${msg.slice(0,25)}…`,()=>{
       currentMsgId=npc.id;
       document.getElementById('msgSelect').value=npc.id;
@@ -1721,11 +1712,10 @@ function npcGossipTick(){
   });
 }
 
-// ========== NPC好感衰减（不理会就会降） ==========
+// ========== NPC好感衰减 ==========
 function loveDecayTick(){
   state.npcs.forEach(npc=>{
     const rel=state.relations[npc.id];if(!rel)return;
-    // 好感50以上，长时间不互动会缓慢降低
     if(rel.love>50&&state.lastTalkTo!==npc.id){
       if(Math.random()<0.15){
         rel.love=Math.max(40,rel.love-1);
@@ -1734,6 +1724,35 @@ function loveDecayTick(){
   });
   save();refreshAll();
 }
+
+// ========== 定时器 ==========
+setInterval(()=>{
+  if(state.player.mp<state.player.maxMp){
+    state.player.mp=Math.min(state.player.maxMp,state.player.mp+5);
+    save();updatePlayerUI();
+  }
+},30000);
+
+setInterval(()=>{
+  npcAutonomyTick();
+  npcGossipTick();
+  loveDecayTick();
+},3600000);
+
+setInterval(()=>{
+  if(Math.random()<0.3&&state.npcs.length>0){
+    if(Math.random()<0.3){
+      triggerRivalEvent();
+    }else{
+      triggerRandomEvent();
+    }
+  }
+},90000);
+
+// ========== 初始化 ==========
+loadSettings();
+refreshAll();
+state.npcs.forEach(n=>ensureSocialCircle(n.id));
 </script>
 </body>
 </html>
