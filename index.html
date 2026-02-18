@@ -30,8 +30,8 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
 .page-hd h2{font-size:16px;color:var(--gold)}
 .page-bd{flex:1;overflow-y:auto;padding:16px}
 .bottomnav{display:flex;background:var(--panel);border-top:1px solid var(--border);flex-shrink:0;height:56px;overflow-x:auto}
-.nb{flex:1;min-width:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--dim);font-size:8px;transition:all .2s;position:relative}
-.nb .ni{font-size:16px}.nb:hover{color:var(--text)}.nb.active{color:var(--cyan)}
+.nb{flex:1;min-width:38px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--dim);font-size:6px;transition:all .2s;position:relative}
+.nb .ni{font-size:14px}.nb:hover{color:var(--text)}.nb.active{color:var(--cyan)}
 .nb.active::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--cyan);border-radius:0 0 2px 2px}
 .chat-header{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:space-between}
 .chat-header .ch-info{font-size:10px;color:var(--dim);margin-left:8px}
@@ -120,6 +120,12 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
 .trib-box::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(232,80,80,.08),transparent);pointer-events:none}
 .trib-box h3{color:var(--danger);font-size:16px}
 .trib-log{margin-top:12px;text-align:left;font-size:11px;line-height:1.7;max-height:250px;overflow-y:auto}
+.subtabs{display:flex;gap:0;background:var(--panel);border-bottom:1px solid var(--border);padding:0 12px}
+.subtab{padding:8px 16px;background:none;border:none;color:var(--dim);font-size:11px;border-bottom:2px solid transparent;transition:all .2s}
+.subtab:hover{color:var(--text)}
+.subtab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.subpage{display:none;flex-direction:column;flex:1;overflow:hidden}
+.subpage.active{display:flex}
 @media(max-width:600px){.cards,.cult-grid{grid-template-columns:1fr}.mini-bars{display:none}}
 </style>
 </head>
@@ -137,26 +143,35 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
   </div>
 </div>
 <div class="main-content">
-  <div class="page active" id="pg-chat">
-    <div class="chat-header"><div><select id="chatSelect"><option value="">选择对话对象</option></select><span class="ch-info" id="chatInfo"></span></div></div>
-    <div class="msgs" id="msgBox"><div class="msg sys">欢迎来到仙途·逆命录 ✨ 先去⚙️设置配API，再创建NPC~</div></div>
-    <div class="chat-actions">
-      <button class="abtn" data-act="调情">💗调情</button><button class="abtn" data-act="双修">✨双修</button>
-      <button class="abtn" data-act="强制播种">🌱播种</button><button class="abtn" data-act="查看身体状况">🔍查看</button>
-      <button class="abtn" data-act="拥入怀中">🤗拥抱</button><button class="abtn" data-act="切磋">⚔️切磋</button>
-      <button class="abtn cyan" data-act="喂丹药">💊喂丹</button>
+  <!-- 互动页（对话+传讯） -->
+  <div class="page active" id="pg-interact">
+    <div class="subtabs">
+      <button class="subtab active" data-sub="chat" data-parent="interact">💬 面对面</button>
+      <button class="subtab" data-sub="msg" data-parent="interact">📨 传讯</button>
     </div>
-    <div class="chat-input"><textarea id="chatInput" placeholder="说点什么…（Shift+Enter换行）" rows="1"></textarea><button class="sbtn" id="sendBtn">发送</button></div>
-  </div>
-  <div class="page" id="pg-msg">
-    <div class="chat-header"><div><select id="msgSelect"><option value="">选择传讯对象</option></select><span class="ch-info" id="msgInfo">远程传讯</span></div></div>
-    <div class="msgs" id="msgMsgBox"><div class="msg sys">📨 传讯系统：远程联络，对方有概率赶来~</div></div>
-    <div class="chat-actions">
-      <button class="abtn" data-msg-act="想你了">💕想你</button><button class="abtn" data-msg-act="速来">🏃速来</button>
-      <button class="abtn" data-msg-act="报平安">✅平安</button><button class="abtn cyan" data-msg-act="邀请闯秘境">🌀邀秘境</button>
+    <div class="subpage active" id="sub-chat">
+      <div class="chat-header"><div><select id="chatSelect"><option value="">选择对话对象</option></select><span class="ch-info" id="chatInfo"></span></div></div>
+      <div class="msgs" id="msgBox"><div class="msg sys">欢迎来到仙途·逆命录 ✨ 先去⚙️设置配API，再创建NPC~</div></div>
+      <div class="chat-actions">
+        <button class="abtn" data-act="调情">💗调情</button><button class="abtn" data-act="双修">✨双修</button>
+        <button class="abtn" data-act="强制播种">🌱播种</button><button class="abtn" data-act="查看身体状况">🔍查看</button>
+        <button class="abtn" data-act="拥入怀中">🤗拥抱</button><button class="abtn" data-act="切磋">⚔️切磋</button>
+        <button class="abtn cyan" data-act="喂丹药">💊喂丹</button>
+      </div>
+      <div class="chat-input"><textarea id="chatInput" placeholder="说点什么…（Shift+Enter换行）" rows="1"></textarea><button class="sbtn" id="sendBtn">发送</button></div>
     </div>
-    <div class="chat-input"><textarea id="msgInput" placeholder="传讯内容…" rows="1"></textarea><button class="sbtn" id="msgSendBtn">传讯</button></div>
+    <div class="subpage" id="sub-msg">
+      <div class="chat-header"><div><select id="msgSelect"><option value="">选择传讯对象</option></select><span class="ch-info" id="msgInfo">远程传讯</span></div></div>
+      <div class="msgs" id="msgMsgBox"><div class="msg sys">📨 传讯系统：远程联络，对方有概率赶来~</div></div>
+      <div class="chat-actions">
+        <button class="abtn" data-msg-act="想你了">💕想你</button><button class="abtn" data-msg-act="速来">🏃速来</button>
+        <button class="abtn" data-msg-act="报平安">✅平安</button><button class="abtn cyan" data-msg-act="邀请闯秘境">🌀邀秘境</button>
+      </div>
+      <div class="chat-input"><textarea id="msgInput" placeholder="传讯内容…" rows="1"></textarea><button class="sbtn" id="msgSendBtn">传讯</button></div>
+    </div>
   </div>
+  
+<!-- 修炼页 -->
   <div class="page" id="pg-cult">
     <div class="page-hd"><h2>🧘 修炼洞府</h2></div>
     <div class="page-bd"><div class="cult-grid">
@@ -166,44 +181,59 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
       <div class="cult-card"><div class="ci">🌱</div><div class="ct">播种术</div><div class="cdesc">强制使目标受孕</div><select id="seedSelect" style="margin-top:6px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px;border-radius:6px;font-size:10px;width:100%"><option value="">选择目标</option></select><button class="cbtn" onclick="doCult('seed')">播种</button><div class="cult-result" id="res-seed"></div></div>
       <div class="cult-card"><div class="ci">💊</div><div class="ct">丹药背包</div><div id="pillList" style="margin-top:6px;font-size:10px;color:var(--dim)">暂无</div><div class="cult-result" id="res-pill"></div></div>
       <div class="cult-card"><div class="ci">📖</div><div class="ct">参悟功法</div><div class="cdesc">概率突破</div><button class="cbtn" onclick="doCult('study')">参悟</button><div class="cult-result" id="res-study"></div></div>
-      <div class="cult-card"><div class="ci">⚡</div><div class="ct">渡劫</div><div class="cdesc">突破瓶颈，历天雷之劫</div><select id="tribCompanion" style="margin-top:6px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px;border-radius:6px;font-size:10px;width:100%"><option value="">无人护法</option></select><button class="cbtn" onclick="doCult('tribulation')">渡劫</button><div class="cult-result" id="res-tribulation"></div></div>
+      <div class="cult-card"><div class="ci">⚡</div><div class="ct">渡劫</div><div class="cdesc">历天雷之劫</div><select id="tribCompanion" style="margin-top:6px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px;border-radius:6px;font-size:10px;width:100%"><option value="">无人护法</option></select><button class="cbtn" onclick="doCult('tribulation')">渡劫</button><div class="cult-result" id="res-tribulation"></div></div>
     </div></div>
   </div>
-  <div class="page" id="pg-realm">
-    <div class="page-hd"><h2>🌀 秘境探索</h2></div>
-    <div class="page-bd">
-      <div class="realm-banner"><h3>🌀 选择秘境</h3><p>携带道侣闯荡，危险与机缘并存！</p>
-        <div style="margin-top:8px"><label style="font-size:10px;color:var(--dim)">同伴：</label><select id="realmCompanion" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px;border-radius:6px;font-size:10px"><option value="">独自前往</option></select></div>
-        <div class="realm-select" id="realmBtns"></div>
+  <!-- 探索页 -->
+  <div class="page" id="pg-explore">
+    <div class="subtabs">
+      <button class="subtab active" data-sub="realm" data-parent="explore">🌀 秘境</button>
+      <button class="subtab" data-sub="beast" data-parent="explore">🐾 灵兽</button>
+    </div>
+    <div class="subpage active" id="sub-realm">
+      <div class="page-bd">
+        <div class="realm-banner"><h3>🌀 选择秘境</h3><p>携带道侣闯荡，危险与机缘并存！</p>
+          <div style="margin-top:8px"><label style="font-size:10px;color:var(--dim)">同伴：</label><select id="realmCompanion" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px;border-radius:6px;font-size:10px"><option value="">独自前往</option></select></div>
+          <div class="realm-select" id="realmBtns"></div>
+        </div>
+        <div class="realm-log" id="realmLog" style="display:none"></div>
       </div>
-      <div class="realm-log" id="realmLog" style="display:none"></div>
+    </div>
+    <div class="subpage" id="sub-beast">
+      <div class="page-hd"><h2>🐾 灵兽</h2><button class="fbtn fbtn-cyan" onclick="catchBeast()" style="font-size:10px;padding:5px 12px">🎯 捕捉</button></div>
+      <div class="page-bd">
+        <div id="beastResult" class="cult-result" style="margin-bottom:12px"></div>
+        <div class="cards" id="beastCards"></div>
+        <div class="empty" id="beastEmpty">还没有灵兽~</div>
+      </div>
     </div>
   </div>
-  <div class="page" id="pg-beast">
-    <div class="page-hd"><h2>🐾 灵兽</h2><button class="fbtn fbtn-cyan" onclick="catchBeast()" style="font-size:10px;padding:5px 12px">🎯 捕捉灵兽</button></div>
-    <div class="page-bd">
-      <div id="beastResult" class="cult-result" style="margin-bottom:12px"></div>
-      <div class="cards" id="beastCards"></div>
-      <div class="empty" id="beastEmpty">还没有灵兽~去捕捉一只吧</div>
+  <!-- 角色页 -->
+  <div class="page" id="pg-chars">
+    <div class="subtabs">
+      <button class="subtab active" data-sub="npc" data-parent="chars">👥 管理</button>
+      <button class="subtab" data-sub="rel" data-parent="chars">💕 关系</button>
+      <button class="subtab" data-sub="event" data-parent="chars">📜 事件</button>
+    </div>
+    <div class="subpage active" id="sub-npc">
+      <div class="page-hd"><h2>👥 角色管理</h2><button class="fbtn fbtn-cyan" onclick="openNpcModal()" style="font-size:10px;padding:5px 12px">✨新建</button></div>
+      <div class="page-bd"><div class="cards" id="npcCards"></div><div class="empty" id="npcEmpty">还没有角色~</div></div>
+    </div>
+    <div class="subpage" id="sub-rel">
+      <div class="page-hd"><h2>💕 关系总览</h2></div>
+      <div class="page-bd"><div class="cards" id="relCards"></div><div class="empty" id="relEmpty">暂无</div></div>
+    </div>
+    <div class="subpage" id="sub-event">
+      <div class="page-hd"><h2>📜 世界事件</h2></div>
+      <div class="page-bd"><div id="eventLog"></div><div class="empty" id="eventEmpty">天地寂静…</div></div>
     </div>
   </div>
-  <div class="page" id="pg-npc">
-    <div class="page-hd"><h2>👥 角色管理</h2><button class="fbtn fbtn-cyan" onclick="openNpcModal()" style="font-size:10px;padding:5px 12px">✨新建</button></div>
-    <div class="page-bd"><div class="cards" id="npcCards"></div><div class="empty" id="npcEmpty">还没有角色~</div></div>
-  </div>
-  <div class="page" id="pg-rel">
-    <div class="page-hd"><h2>💕 关系总览</h2></div>
-    <div class="page-bd"><div class="cards" id="relCards"></div><div class="empty" id="relEmpty">暂无</div></div>
-  </div>
-  <div class="page" id="pg-event">
-    <div class="page-hd"><h2>📜 世界事件</h2></div>
-    <div class="page-bd"><div id="eventLog"></div><div class="empty" id="eventEmpty">天地寂静…</div></div>
-  </div>
+  <!-- 设置页 -->
   <div class="page" id="pg-set">
     <div class="page-hd"><h2>⚙️ 设置</h2></div>
     <div class="page-bd"><div class="settings-wrap">
       <div class="settings-section"><h3>🔑 AI接口</h3>
-        <div class="fg"><label>API完整地址（填到你站点要求的完整路径）</label><input id="apiUrl" placeholder="https://你的站点.com/v1/chat/completions"></div>
+        <div class="fg"><label>API完整地址</label><input id="apiUrl" placeholder="https://你的站点.com/v1/chat/completions"></div>
         <div class="fg"><label>API Key</label><input id="apiKey" type="password" placeholder="sk-..."></div>
         <div class="fg"><label>模型 <button class="fetch-btn" onclick="fetchModels()">🔄拉取</button></label><input id="apiModel" placeholder="gpt-4o"><div class="model-list" id="modelList"></div></div>
         <div class="fg"><label>最大Token</label><input id="apiMaxTokens" type="number" value="2048"></div>
@@ -225,14 +255,10 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
   </div>
 </div>
 <div class="bottomnav">
-  <button class="nb active" data-page="chat"><span class="ni">💬</span>对话</button>
-  <button class="nb" data-page="msg"><span class="ni">📨</span>传讯</button>
+  <button class="nb active" data-page="interact"><span class="ni">💬</span>互动</button>
   <button class="nb" data-page="cult"><span class="ni">🧘</span>修炼</button>
-  <button class="nb" data-page="realm"><span class="ni">🌀</span>秘境</button>
-  <button class="nb" data-page="beast"><span class="ni">🐾</span>灵兽</button>
-  <button class="nb" data-page="npc"><span class="ni">👥</span>角色</button>
-  <button class="nb" data-page="rel"><span class="ni">💕</span>关系</button>
-  <button class="nb" data-page="event"><span class="ni">📜</span>事件</button>
+  <button class="nb" data-page="explore"><span class="ni">🌀</span>探索</button>
+  <button class="nb" data-page="chars"><span class="ni">👥</span>角色</button>
   <button class="nb" data-page="set"><span class="ni">⚙️</span>设置</button>
 </div>
 <div class="modal-mask" id="npcModal"><div class="modal">
@@ -781,6 +807,16 @@ function switchPage(name){
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.getElementById('pg-'+name)?.classList.add('active');
   document.querySelector(`.nb[data-page="${name}"]`)?.classList.add('active')}
+
+// 子标签切换
+document.querySelectorAll('.subtab').forEach(btn=>{btn.addEventListener('click',function(){
+  const parent=this.dataset.parent,sub=this.dataset.sub;
+  const page=document.getElementById('pg-'+parent);if(!page)return;
+  page.querySelectorAll('.subtab').forEach(t=>t.classList.remove('active'));
+  page.querySelectorAll('.subpage').forEach(s=>s.classList.remove('active'));
+  this.classList.add('active');
+  document.getElementById('sub-'+sub)?.classList.add('active');
+})});
 
 document.querySelectorAll('.nb').forEach(btn=>{btn.addEventListener('click',()=>switchPage(btn.dataset.page))});
 document.getElementById('chatSelect').addEventListener('change',function(){if(this.value){currentChatId=this.value;loadChat()}});
