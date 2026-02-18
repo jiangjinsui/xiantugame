@@ -8,7 +8,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#08080f">
-<link rel="manifest" href="manifest.json">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#08080f;--panel:#101020;--card:#161630;--border:#252550;--gold:#d4a843;--cyan:#5ce0d8;--pink:#e87ca0;--text:#c8c8e0;--dim:#6a6a8a;--danger:#e85050;--green:#50c878;--purple:#a070e0;--orange:#e0a050}
@@ -21,8 +20,8 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
 .topbar .pinfo .pn{color:var(--cyan);font-weight:bold;font-size:13px}
 .topbar .pinfo .pr{color:var(--gold)}
 .mini-bars{display:flex;gap:8px;align-items:center}
-.mini-bar{width:60px;height:4px;background:#1a1a2e;border-radius:2px;overflow:hidden}
-.mini-bar .mf{height:100%;border-radius:2px;transition:width .5s}
+.mini-bar{width:60px;height:6px;background:#1a1a2e;border-radius:3px;overflow:hidden}
+.mini-bar .mf{height:100%;border-radius:3px;transition:width .5s}
 .sf-hp{background:linear-gradient(90deg,#e85050,#ff7070)}.sf-mp{background:linear-gradient(90deg,#5070e8,#70a0ff)}.sf-exp{background:linear-gradient(90deg,#d4a843,#f0d060)}
 .main-content{flex:1;overflow:hidden;position:relative}
 .page{display:none;flex-direction:column;height:100%;position:absolute;inset:0}.page.active{display:flex}
@@ -33,6 +32,7 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
 .nb{flex:1;min-width:38px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--dim);font-size:6px;transition:all .2s;position:relative}
 .nb .ni{font-size:14px}.nb:hover{color:var(--text)}.nb.active{color:var(--cyan)}
 .nb.active::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--cyan);border-radius:0 0 2px 2px}
+.nb .notif-dot{position:absolute;top:4px;right:25%;width:6px;height:6px;background:var(--danger);border-radius:50%;display:none}
 .chat-header{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:space-between}
 .chat-header .ch-info{font-size:10px;color:var(--dim);margin-left:8px}
 .chat-header select{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:6px;font-size:11px}
@@ -40,7 +40,7 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
 .msg{max-width:78%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;animation:msgIn .3s ease}
 @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .msg.sys{align-self:center;max-width:90%;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.15);color:var(--gold);font-size:11px;text-align:center;border-radius:8px}
-.msg.user{align-self:flex-end;background:linear-gradient(135deg,rgba(92,224,216,.12),rgba(92,224,216,.06));border:1px solid rgba(92,224,216,.12)}
+.msg.user{align-self:flex-end;background:linear-gradient(135deg,rgba(232,124,160,.12),rgba(232,124,160,.06));border:1px solid rgba(232,124,160,.12)}
 .msg.ai{align-self:flex-start;background:var(--card);border:1px solid var(--border)}
 .msg .ms{font-size:10px;color:var(--dim);margin-bottom:3px}
 .msg-remote{border-left:2px solid var(--purple)!important}
@@ -99,6 +99,7 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
 .fbtn-gold{background:linear-gradient(135deg,var(--gold),#c09030);color:var(--bg)}
 .fbtn-cyan{background:linear-gradient(135deg,var(--cyan),#40b0a8);color:var(--bg)}
 .fbtn-danger{background:linear-gradient(135deg,var(--danger),#c04040);color:#fff}
+.fbtn-purple{background:linear-gradient(135deg,var(--purple),#8050c0);color:#fff}
 .modal-mask{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
 .modal-mask.show{display:flex}
 .modal{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;width:92%;max-width:480px;max-height:82vh;overflow-y:auto}
@@ -114,26 +115,47 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
 .fetch-btn{padding:3px 10px;border:1px solid var(--border);background:none;color:var(--cyan);border-radius:6px;font-size:10px;margin-left:6px}
 .beast-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;transition:all .25s}
 .beast-card:hover{border-color:rgba(224,160,80,.4);transform:translateY(-2px)}
-.beast-card .bn{font-size:14px;font-weight:bold}.beast-card .bt{font-size:10px;margin-top:2px}
-.beast-card .bs{font-size:10px;color:var(--dim);margin-top:4px;line-height:1.4}
-.trib-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;position:relative;overflow:hidden}
-.trib-box::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(232,80,80,.08),transparent);pointer-events:none}
-.trib-box h3{color:var(--danger);font-size:16px}
-.trib-log{margin-top:12px;text-align:left;font-size:11px;line-height:1.7;max-height:250px;overflow-y:auto}
 .subtabs{display:flex;gap:0;background:var(--panel);border-bottom:1px solid var(--border);padding:0 12px}
 .subtab{padding:8px 16px;background:none;border:none;color:var(--dim);font-size:11px;border-bottom:2px solid transparent;transition:all .2s}
 .subtab:hover{color:var(--text)}
 .subtab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
 .subpage{display:none;flex-direction:column;flex:1;overflow:hidden}
 .subpage.active{display:flex}
+
+/* 特效动画 */
+@keyframes flashAnim{0%{opacity:1}100%{opacity:0}}
+@keyframes floatUp{0%{transform:scale(.5) translateY(20px);opacity:0}30%{transform:scale(1.2) translateY(0);opacity:1}100%{transform:scale(1) translateY(-40px);opacity:0}}
+@keyframes slideInRight{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+.screen-flash{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;pointer-events:none;animation:flashAnim 1.5s ease-out forwards}
+.screen-flash .flash-text{font-size:24px;font-weight:bold;text-shadow:0 0 30px currentColor;animation:floatUp 1.5s ease-out forwards}
+.float-num{position:fixed;z-index:150;font-size:14px;font-weight:bold;pointer-events:none;animation:floatUp 1s ease-out forwards}
+.notif-toast{position:fixed;top:56px;right:12px;z-index:150;background:var(--card);border:1px solid var(--cyan);border-radius:10px;padding:10px 16px;font-size:12px;color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,.4);max-width:280px;cursor:pointer;animation:slideInRight .3s ease}
+.notif-toast.fading{animation:fadeOut .5s forwards}
+
+/* 战斗选择按钮 */
+.battle-choices{display:flex;gap:6px;padding:8px 0;flex-wrap:wrap}
+.battle-choices button{padding:6px 14px;border:1px solid var(--border);background:rgba(92,224,216,.05);color:var(--cyan);border-radius:8px;font-size:11px;transition:all .2s}
+.battle-choices button:hover{border-color:var(--cyan);background:rgba(92,224,216,.12)}
+
+/* 事件弹窗选项 */
+.event-choice{text-align:left;padding:10px 14px;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:10px;font-size:12px;transition:all .2s;width:100%;margin-bottom:6px}
+.event-choice:hover{border-color:var(--pink);background:rgba(232,124,160,.06);transform:translateX(4px)}
+.event-choice .ec-cost{font-size:9px;color:var(--danger);margin-top:2px}
+.event-choice .ec-hint{font-size:9px;color:var(--dim);margin-top:2px}
+
 @media(max-width:600px){.cards,.cult-grid{grid-template-columns:1fr}.mini-bars{display:none}}
 </style>
 </head>
 <body>
+
 <div class="topbar">
   <div class="logo"><h1>🌙 仙途·逆命录</h1></div>
   <div class="pinfo">
-    <span class="pn" id="pName">无名散修</span>
+    <span class="pn" id="pName">无名仙子</span>
     <span class="pr" id="pRealm">凡人</span>
     <div class="mini-bars">
       <div class="mini-bar" title="气血"><div class="mf sf-hp" id="hpBar" style="width:100%"></div></div>
@@ -142,8 +164,9 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
     </div>
   </div>
 </div>
+
 <div class="main-content">
-  <!-- 互动页（对话+传讯） -->
+  <!-- 互动页 -->
   <div class="page active" id="pg-interact">
     <div class="subtabs">
       <button class="subtab active" data-sub="chat" data-parent="interact">💬 面对面</button>
@@ -151,39 +174,45 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
     </div>
     <div class="subpage active" id="sub-chat">
       <div class="chat-header"><div><select id="chatSelect"><option value="">选择对话对象</option></select><span class="ch-info" id="chatInfo"></span></div></div>
-      <div class="msgs" id="msgBox"><div class="msg sys">欢迎来到仙途·逆命录 ✨ 先去⚙️设置配API，再创建NPC~</div></div>
+      <div class="msgs" id="msgBox"><div class="msg sys">欢迎来到仙途·逆命录 ✨ 先去⚙️设置配API，再创建或生成NPC~</div></div>
       <div class="chat-actions">
-        <button class="abtn" data-act="调情">💗调情</button><button class="abtn" data-act="双修">✨双修</button>
-        <button class="abtn" data-act="强制播种">🌱播种</button><button class="abtn" data-act="查看身体状况">🔍查看</button>
-        <button class="abtn" data-act="拥入怀中">🤗拥抱</button><button class="abtn" data-act="切磋">⚔️切磋</button>
+        <button class="abtn" data-act="撒娇">🥺撒娇</button>
+        <button class="abtn" data-act="牵手">🤝牵手</button>
+        <button class="abtn" data-act="依偎">💕依偎</button>
+        <button class="abtn" data-act="送花">🌸送花</button>
+        <button class="abtn" data-act="亲亲">💋亲亲</button>
+        <button class="abtn" data-act="切磋">⚔️切磋</button>
         <button class="abtn cyan" data-act="喂丹药">💊喂丹</button>
+        <button class="abtn cyan" data-act="查看状态">🔍查看</button>
       </div>
       <div class="chat-input"><textarea id="chatInput" placeholder="说点什么…（Shift+Enter换行）" rows="1"></textarea><button class="sbtn" id="sendBtn">发送</button></div>
     </div>
     <div class="subpage" id="sub-msg">
       <div class="chat-header"><div><select id="msgSelect"><option value="">选择传讯对象</option></select><span class="ch-info" id="msgInfo">远程传讯</span></div></div>
-      <div class="msgs" id="msgMsgBox"><div class="msg sys">📨 传讯系统：远程联络，对方有概率赶来~</div></div>
+      <div class="msgs" id="msgMsgBox"><div class="msg sys">📨 传讯系统：远程联络~</div></div>
       <div class="chat-actions">
-        <button class="abtn" data-msg-act="想你了">💕想你</button><button class="abtn" data-msg-act="速来">🏃速来</button>
-        <button class="abtn" data-msg-act="报平安">✅平安</button><button class="abtn cyan" data-msg-act="邀请闯秘境">🌀邀秘境</button>
+        <button class="abtn" data-msg-act="想你了">💕想你</button>
+        <button class="abtn" data-msg-act="在干嘛">🤔在干嘛</button>
+        <button class="abtn" data-msg-act="快来找我">🏃快来</button>
+        <button class="abtn cyan" data-msg-act="一起闯秘境吧">🌀邀秘境</button>
       </div>
       <div class="chat-input"><textarea id="msgInput" placeholder="传讯内容…" rows="1"></textarea><button class="sbtn" id="msgSendBtn">传讯</button></div>
     </div>
   </div>
-  
-<!-- 修炼页 -->
+
+  <!-- 修炼页 -->
   <div class="page" id="pg-cult">
     <div class="page-hd"><h2>🧘 修炼洞府</h2></div>
     <div class="page-bd"><div class="cult-grid">
       <div class="cult-card"><div class="ci">🧘</div><div class="ct">打坐修炼</div><div class="cdesc">吸收灵气，提升修为</div><button class="cbtn" onclick="doCult('meditate')">修炼</button><div class="cult-result" id="res-meditate"></div></div>
       <div class="cult-card"><div class="ci">⚗️</div><div class="ct">炼丹</div><div class="cdesc">炼制丹药</div><button class="cbtn" onclick="doCult('alchemy')">炼丹</button><div class="cult-result" id="res-alchemy"></div></div>
       <div class="cult-card"><div class="ci">💞</div><div class="ct">双修</div><div class="cdesc">与道侣双修</div><select id="dualSelect" style="margin-top:6px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px;border-radius:6px;font-size:10px;width:100%"><option value="">选择对象</option></select><button class="cbtn" onclick="doCult('dual')">双修</button><div class="cult-result" id="res-dual"></div></div>
-      <div class="cult-card"><div class="ci">🌱</div><div class="ct">播种术</div><div class="cdesc">强制使目标受孕</div><select id="seedSelect" style="margin-top:6px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px;border-radius:6px;font-size:10px;width:100%"><option value="">选择目标</option></select><button class="cbtn" onclick="doCult('seed')">播种</button><div class="cult-result" id="res-seed"></div></div>
-      <div class="cult-card"><div class="ci">💊</div><div class="ct">丹药背包</div><div id="pillList" style="margin-top:6px;font-size:10px;color:var(--dim)">暂无</div><div class="cult-result" id="res-pill"></div></div>
       <div class="cult-card"><div class="ci">📖</div><div class="ct">参悟功法</div><div class="cdesc">概率突破</div><button class="cbtn" onclick="doCult('study')">参悟</button><div class="cult-result" id="res-study"></div></div>
+      <div class="cult-card"><div class="ci">💊</div><div class="ct">丹药背包</div><div id="pillList" style="margin-top:6px;font-size:10px;color:var(--dim)">暂无</div><div class="cult-result" id="res-pill"></div></div>
       <div class="cult-card"><div class="ci">⚡</div><div class="ct">渡劫</div><div class="cdesc">历天雷之劫</div><select id="tribCompanion" style="margin-top:6px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px;border-radius:6px;font-size:10px;width:100%"><option value="">无人护法</option></select><button class="cbtn" onclick="doCult('tribulation')">渡劫</button><div class="cult-result" id="res-tribulation"></div></div>
     </div></div>
   </div>
+
   <!-- 探索页 -->
   <div class="page" id="pg-explore">
     <div class="subtabs">
@@ -192,7 +221,7 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
     </div>
     <div class="subpage active" id="sub-realm">
       <div class="page-bd">
-        <div class="realm-banner"><h3>🌀 选择秘境</h3><p>携带道侣闯荡，危险与机缘并存！</p>
+        <div class="realm-banner"><h3>🌀 选择秘境</h3><p>携带同伴闯荡，危险与机缘并存！</p>
           <div style="margin-top:8px"><label style="font-size:10px;color:var(--dim)">同伴：</label><select id="realmCompanion" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px;border-radius:6px;font-size:10px"><option value="">独自前往</option></select></div>
           <div class="realm-select" id="realmBtns"></div>
         </div>
@@ -208,6 +237,7 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
       </div>
     </div>
   </div>
+
   <!-- 角色页 -->
   <div class="page" id="pg-chars">
     <div class="subtabs">
@@ -216,8 +246,13 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
       <button class="subtab" data-sub="event" data-parent="chars">📜 事件</button>
     </div>
     <div class="subpage active" id="sub-npc">
-      <div class="page-hd"><h2>👥 角色管理</h2><button class="fbtn fbtn-cyan" onclick="openNpcModal()" style="font-size:10px;padding:5px 12px">✨新建</button></div>
-      <div class="page-bd"><div class="cards" id="npcCards"></div><div class="empty" id="npcEmpty">还没有角色~</div></div>
+      <div class="page-hd"><h2>👥 角色管理</h2>
+        <div style="display:flex;gap:6px">
+          <button class="fbtn fbtn-purple" onclick="aiGenerateNpc()" style="font-size:10px;padding:5px 12px">🎲AI生成</button>
+          <button class="fbtn fbtn-cyan" onclick="openNpcModal()" style="font-size:10px;padding:5px 12px">✨手动新建</button>
+        </div>
+      </div>
+      <div class="page-bd"><div class="cards" id="npcCards"></div><div class="empty" id="npcEmpty">还没有角色~ 点AI生成或手动新建</div></div>
     </div>
     <div class="subpage" id="sub-rel">
       <div class="page-hd"><h2>💕 关系总览</h2></div>
@@ -228,6 +263,7 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
       <div class="page-bd"><div id="eventLog"></div><div class="empty" id="eventEmpty">天地寂静…</div></div>
     </div>
   </div>
+
   <!-- 设置页 -->
   <div class="page" id="pg-set">
     <div class="page-hd"><h2>⚙️ 设置</h2></div>
@@ -241,52 +277,80 @@ button{cursor:pointer;font-family:inherit}input,textarea,select{font-family:inhe
         <span id="apiSaveMsg" style="color:var(--green);font-size:11px;margin-left:6px"></span>
       </div>
       <div class="settings-section"><h3>🎭 主控人设</h3>
-        <div class="fg"><div class="row"><div><label>名号</label><input id="pcName" placeholder="角色名"></div><div><label>性别</label><select id="pcGender"><option value="男">男</option><option value="女">女</option><option value="其他">其他</option></select></div></div></div>
+        <div class="fg"><div class="row"><div><label>名号</label><input id="pcName" placeholder="角色名"></div><div><label>性别</label><select id="pcGender"><option value="女">女</option><option value="男">男</option><option value="其他">其他</option></select></div></div></div>
         <div class="fg"><label>境界</label><select id="pcRealm"><option>凡人</option><option>练气期</option><option>筑基期</option><option>金丹期</option><option>元婴期</option><option>化神期</option><option>合体期</option><option>大乘期</option><option>渡劫期</option><option>仙人</option></select></div>
         <div class="fg"><label>人设描述</label><textarea id="pcDesc" placeholder="性格、外貌、能力…"></textarea></div>
       </div>
       <div class="settings-section"><h3>🌍 世界观补充</h3><div class="fg"><textarea id="worldSetting" placeholder="额外设定…"></textarea></div></div>
       <div style="display:flex;gap:8px;align-items:center">
         <button class="fbtn fbtn-gold" onclick="saveSettings()">💾保存全部</button>
-        <button class="fbtn fbtn-danger" onclick="if(confirm('清除所有？')){localStorage.clear();location.reload()}">🗑️重置</button>
+        <button class="fbtn fbtn-danger" onclick="if(confirm('清除所有数据？')){localStorage.clear();location.reload()}">🗑️重置</button>
         <span id="saveMsg" style="color:var(--green);font-size:11px"></span>
       </div>
     </div></div>
   </div>
 </div>
+
 <div class="bottomnav">
-  <button class="nb active" data-page="interact"><span class="ni">💬</span>互动</button>
+  <button class="nb active" data-page="interact"><span class="ni">💬</span><span class="notif-dot" id="notifChat"></span>互动</button>
   <button class="nb" data-page="cult"><span class="ni">🧘</span>修炼</button>
   <button class="nb" data-page="explore"><span class="ni">🌀</span>探索</button>
   <button class="nb" data-page="chars"><span class="ni">👥</span>角色</button>
   <button class="nb" data-page="set"><span class="ni">⚙️</span>设置</button>
 </div>
+
+<!-- NPC编辑弹窗 -->
 <div class="modal-mask" id="npcModal"><div class="modal">
   <button class="mclose" onclick="closeNpcModal()">✕</button>
   <h3 id="npcModalTitle">✨ 新建角色</h3><input type="hidden" id="editNpcId">
   <div class="fg"><div class="row"><div><label>名字</label><input id="npcName"></div><div><label>性别</label><select id="npcGender"><option value="男">男</option><option value="女">女</option><option value="其他">其他</option></select></div></div></div>
-  <div class="fg"><div class="row"><div><label>境界</label><select id="npcRealm"><option>练气期</option><option>筑基期</option><option>金丹期</option><option>元婴期</option><option>化神期</option><option>合体期</option><option>大乘期</option><option>渡劫期</option><option>仙人</option></select></div><div><label>身份</label><input id="npcRole" placeholder="魔道圣子…"></div></div></div>
+  <div class="fg"><div class="row"><div><label>境界</label><select id="npcRealm"><option>练气期</option><option>筑基期</option><option>金丹期</option><option>元婴期</option><option>化神期</option><option>合体期</option><option>大乘期</option><option>渡劫期</option><option>仙人</option></select></div><div><label>身份</label><input id="npcRole" placeholder="剑修、魔道圣子…"></div></div></div>
   <div class="fg"><label>性格与外貌</label><textarea id="npcPersonality" placeholder="详细描述…"></textarea></div>
-  <div class="fg"><div class="row"><div><label>初始关系</label><select id="npcRelType"><option value="陌生人">陌生人</option><option value="同门">同门</option><option value="宿敌">宿敌</option><option value="暧昧">暧昧</option><option value="道侣">道侣</option><option value="仆从">仆从</option></select></div><div><label>模式</label><select id="npcRelMode"><option value="可攻略">海王</option><option value="专情">专情1v1</option></select></div></div></div>
-  <div class="fg"><label>标签（逗号分隔）</label><input id="npcTags" placeholder="傲娇,易孕体质,忠犬"></div>
+  <div class="fg"><div class="row"><div><label>初始关系</label><select id="npcRelType"><option value="陌生人">陌生人</option><option value="同门">同门</option><option value="青梅竹马">青梅竹马</option><option value="宿敌">宿敌</option><option value="暧昧">暧昧</option><option value="道侣">道侣</option><option value="仆从">仆从</option></select></div><div><label>模式</label><select id="npcRelMode"><option value="可攻略">可攻略</option><option value="专情">专情1v1</option></select></div></div></div>
+  <div class="fg"><label>标签（逗号分隔）</label><input id="npcTags" placeholder="傲娇,温柔,毒舌,忠犬"></div>
   <div class="fg"><label>额外AI指令</label><textarea id="npcSysPrompt" placeholder="给AI的额外指令…"></textarea></div>
   <button class="fbtn fbtn-gold" onclick="saveNpc()">💾保存</button>
 </div></div>
+
+<!-- 内心弹窗 -->
 <div class="modal-mask" id="statusModal"><div class="modal">
   <button class="mclose" onclick="document.getElementById('statusModal').classList.remove('show')">✕</button>
   <h3>🔮 <span id="statusNpcName"></span> 的内心</h3>
   <div id="statusContent" style="font-size:12px;line-height:1.8"></div>
 </div></div>
+
+<!-- 查岗弹窗 -->
 <div class="modal-mask" id="checkModal"><div class="modal">
   <button class="mclose" onclick="document.getElementById('checkModal').classList.remove('show')">✕</button>
   <h3 id="checkTitle">🔍 查岗</h3>
   <div id="checkContent" style="font-size:12px;line-height:1.8"></div>
 </div></div>
 
+<!-- 随机事件弹窗 -->
+<div class="modal-mask" id="eventModal"><div class="modal">
+  <h3 id="eventModalTitle">⚡ 事件</h3>
+  <div id="eventModalContent"></div>
+</div></div>
+
+<!-- AI生成NPC弹窗 -->
+<div class="modal-mask" id="aiGenModal"><div class="modal">
+  <button class="mclose" onclick="document.getElementById('aiGenModal').classList.remove('show')">✕</button>
+  <h3>🎲 AI生成角色</h3>
+  <div class="fg"><label>你想要什么样的角色？（可留空随机）</label><textarea id="aiGenHint" placeholder="例如：温柔的师兄、高冷的剑修、腹黑的魔道少主…" style="min-height:50px"></textarea></div>
+  <button class="fbtn fbtn-purple" id="aiGenBtn" onclick="doAiGenerate()">🎲 生成</button>
+  <div id="aiGenResult" style="margin-top:12px;font-size:11px;line-height:1.7;display:none"></div>
+  <div id="aiGenActions" style="margin-top:10px;display:none">
+    <button class="fbtn fbtn-gold" onclick="acceptAiNpc()">✅ 采用</button>
+    <button class="fbtn fbtn-cyan" onclick="editAiNpc()" style="margin-left:6px">✏️ 编辑后采用</button>
+    <button class="fbtn fbtn-danger" onclick="doAiGenerate()" style="margin-left:6px">🔄 重新生成</button>
+  </div>
+</div></div>
+
 <script>
+// ========== 存储 ==========
 const D={get(k,d){try{return JSON.parse(localStorage.getItem('xt_'+k))||d}catch{return d}},set(k,v){localStorage.setItem('xt_'+k,JSON.stringify(v))}};
 const REALMS=['凡人','练气期','筑基期','金丹期','元婴期','化神期','合体期','大乘期','渡劫期','仙人'];
-const PILLS_DB=[{name:'回气丹',desc:'恢复30灵力',effect:'mp',val:30,rate:.8},{name:'培元丹',desc:'恢复50气血',effect:'hp',val:50,rate:.75},{name:'筑基丹',desc:'大量修为',effect:'exp',val:60,rate:.5},{name:'助孕丹',desc:'提高播种率',effect:'fertility',val:1,rate:.4},{name:'合欢散',desc:'好感+20',effect:'love',val:20,rate:.35},{name:'破境丹',desc:'概率突破',effect:'breakthrough',val:1,rate:.2}];
+const PILLS_DB=[{name:'回气丹',desc:'恢复30灵力',effect:'mp',val:30,rate:.8},{name:'培元丹',desc:'恢复50气血',effect:'hp',val:50,rate:.75},{name:'筑基丹',desc:'大量修为',effect:'exp',val:60,rate:.5},{name:'合欢散',desc:'好感+20',effect:'love',val:20,rate:.35},{name:'破境丹',desc:'概率突破',effect:'breakthrough',val:1,rate:.2}];
 const REALMS_DB=[{name:'落霞秘境',level:0,desc:'入门',rewards:['灵草','低阶灵石','残页功法']},{name:'幽冥洞窟',level:2,desc:'阴气森森',rewards:['冥铁','中阶灵石','阴属性功法']},{name:'天火熔炉',level:4,desc:'极危险',rewards:['天火精华','高阶灵石','炼器秘法']},{name:'双修秘境',level:3,desc:'须携伴侣',rewards:['合欢花','双修功法','亲密度大增']},{name:'混沌虚空',level:6,desc:'仙人之下莫入',rewards:['混沌灵液','仙阶功法','逆天造化']},{name:'万兽山',level:1,desc:'灵兽栖息地',rewards:['兽丹','驯兽绳','灵兽蛋']}];
 const BEAST_TYPES=[
   {type:'灵兽',color:'var(--cyan)',power:[10,30],tame:.7,names:['玉兔','灵鹤','青鸾','白鹿','灵狐','仙鲤']},
@@ -294,10 +358,73 @@ const BEAST_TYPES=[
   {type:'神兽',color:'var(--gold)',power:[60,100],tame:.15,names:['麒麟','白泽','朱雀','玄武','青龙','凤凰']}
 ];
 
-let state=D.get('state',{player:{name:'无名散修',gender:'男',realm:'凡人',desc:'',hp:100,maxHp:100,mp:50,maxMp:50,exp:0,maxExp:100},api:{url:'',key:'',model:'gpt-4o',maxTokens:2048},worldSetting:'',npcs:[],relations:{},chatHistories:{},msgHistories:{},events:[],pregnancies:{},pills:[],beasts:[],lastTalkTo:null});
+// 随机事件库
+const RANDOM_EVENTS=[
+  {title:'🗡️ 魔修截杀',desc:'一名魔修拦住去路，杀气腾腾！',choices:[
+    {text:'⚔️ 迎战',cost:{hp:-30},reward:{exp:40},chance:.6,failCost:{hp:-50}},
+    {text:'🏃 逃跑',cost:{mp:-20},reward:null,chance:.8,failCost:{hp:-20}},
+    {text:'💬 以理服人',cost:null,reward:{exp:10},chance:.3,failCost:{hp:-40}}
+  ]},
+  {title:'🌸 灵花绽放',desc:'路边一株千年灵花正在盛开，灵气充沛！',choices:[
+    {text:'🌿 采摘',reward:{pill:'筑基丹'},chance:.5,failCost:{hp:-15}},
+    {text:'🧘 就地修炼',reward:{exp:50,mp:30},chance:.9},
+    {text:'🌸 摘花送人',reward:{love:10},chance:1.0}
+  ]},
+  {title:'👤 神秘老者',desc:'一个衣衫褴褛的老者向你讨要灵石…',choices:[
+    {text:'💰 赠予',cost:{mp:-30},reward:{exp:80},chance:.7},
+    {text:'🙅 婉拒',reward:null,chance:1.0},
+    {text:'🔍 灵识探查',reward:{exp:100,pill:'破境丹'},chance:.2,failCost:{hp:-60}}
+  ]},
+  {title:'🦊 受伤灵狐',desc:'一只灵狐倒在路边，奄奄一息…',choices:[
+    {text:'💊 救治',cost:{mp:-15},reward:{beast:true},chance:.6},
+    {text:'🚶 路过',reward:null,chance:1.0},
+    {text:'🔍 查看伤势',reward:{exp:20},chance:.8}
+  ]},
+  {title:'🌙 月下奇遇',desc:'月光如水，你感到体内灵力涌动…',choices:[
+    {text:'🧘 顺势修炼',reward:{exp:60,mp:20},chance:.85},
+    {text:'🌙 赏月',reward:{mp:40},chance:1.0},
+    {text:'📖 参悟月华功法',reward:{exp:120},chance:.25,failCost:{mp:-30}}
+  ]},
+  {title:'💎 灵石矿脉',desc:'发现一处隐秘的灵石矿脉！',choices:[
+    {text:'⛏️ 开采',cost:{mp:-20},reward:{exp:50,pill:'回气丹'},chance:.7,failCost:{hp:-25}},
+    {text:'📍 记下位置',reward:{exp:10},chance:1.0},
+    {text:'🏃 独吞',reward:{exp:80,pill:'筑基丹'},chance:.4,failCost:{hp:-40}}
+  ]}
+];
+
+let state=D.get('state',{
+  player:{name:'无名仙子',gender:'女',realm:'凡人',desc:'',hp:100,maxHp:100,mp:50,maxMp:50,exp:0,maxExp:100},
+  api:{url:'',key:'',model:'gpt-4o',maxTokens:2048},
+  worldSetting:'',npcs:[],relations:{},chatHistories:{},msgHistories:{},events:[],pregnancies:{},pills:[],beasts:[],lastTalkTo:null
+});
+let aiGenTemp=null; // AI生成NPC临时数据
+let sending=false; // 防止重复发送
+
 function save(){D.set('state',state)}
 function getApiUrl(){return state.api.url.trim().replace(/\/+$/,'')}
 
+// ========== 视觉特效 ==========
+function screenFlash(color,text){
+  const el=document.createElement('div');
+  el.className='screen-flash';
+  el.style.background=`radial-gradient(circle,${color}33,transparent)`;
+  if(text)el.innerHTML=`<div class="flash-text" style="color:${color}">${text}</div>`;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1500);
+}
+function floatNum(text,color,x,y){
+  const el=document.createElement('div');el.className='float-num';el.textContent=text;
+  el.style.color=color;el.style.textShadow=`0 0 8px ${color}`;
+  el.style.left=(x||window.innerWidth/2)+'px';el.style.top=(y||window.innerHeight/2)+'px';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1000);
+}
+function showToast(text,onclick){
+  const el=document.createElement('div');el.className='notif-toast';el.textContent=text;
+  if(onclick)el.onclick=()=>{onclick();el.remove()};
+  document.body.appendChild(el);
+  setTimeout(()=>{el.classList.add('fading');setTimeout(()=>el.remove(),500)},4000);
+}
+
+// ========== System Prompt ==========
 function buildSys(npc,mode){
   const p=state.player,rel=state.relations[npc.id]||{type:'陌生人',love:0},preg=state.pregnancies[npc.id];
   let ps='';if(preg?.active)ps=`\n【状态】${npc.name}已怀孕，${preg.stage}，第${preg.days}天。`;
@@ -308,13 +435,20 @@ function buildSys(npc,mode){
   else if(mode==='npc-check')ms=`\n【场景】${npc.name}吃醋查岗！根据好感和性格反应。`;
   else if(mode==='user-check')ms=`\n【场景】${p.name}来查${npc.name}的岗。根据性格反应。`;
   else if(mode==='tribulation')ms=`\n【场景】${p.name}正在渡劫，天雷降下！${npc.name}作为${rel.type}在旁护法。根据好感决定是否舍身挡雷。好感80以上大概率挡雷。描写天雷、战斗、情感。`;
+  const social=state.socialNet?.[npc.id];
+let socialInfo='';
+if(social?.friends?.length){
+  socialInfo=`\n【社交圈】${npc.name}的好友：${social.friends.map(f=>`${f.name}（${f.gender}·${f.relation}·亲密${f.closeness}）`).join('、')}`;
+  if(social.rivals?.length)socialInfo+=`\n追求者：${social.rivals.join('、')}`;
+}
   return `你是修仙世界角色扮演AI，严格扮演角色。绝对不要跳出角色，不要以AI身份回复。
-【世界观】修仙世界。男性可怀孕（男生子），自然法则。双修/术法可使男性受孕。可强制播种。${state.worldSetting?'补充：'+state.worldSetting:''}
+【世界观】修仙世界。${state.worldSetting?'补充：'+state.worldSetting:''}
 【角色】${npc.name}｜${npc.gender}｜${npc.realm}｜${npc.role||'散修'}
 性格外貌：${npc.personality||'待设定'}
 关系：${rel.type}（好感${rel.love}/100）｜${npc.relMode||'可攻略'}
-${npc.tags?.length?'标签：'+npc.tags.join('、'):''}${npc.sysPrompt?'\n额外：'+npc.sysPrompt:''}${ps}${ms}
-【对方】${p.name}｜${p.gender}｜${p.realm}｜${p.desc||'神秘修士'}`;
+${npc.tags?.length?'标签：'+npc.tags.join('、'):''}${npc.sysPrompt?'\n额外：'+npc.sysPrompt:''}${ps}${socialInfo}${ms}
+【对方】${p.name}｜${p.gender}｜${p.realm}｜${p.desc||'修仙少女'}
+【规则】根据好感度调整态度。好感低时冷淡/警惕，好感高时亲密/温柔。每次回复末尾用【好感+N】或【好感-N】标注好感变化（-5到+5之间）。`;
 }
 
 // ========== API ==========
@@ -337,8 +471,15 @@ function saveApi(){
   state.api.maxTokens=parseInt(document.getElementById('apiMaxTokens').value)||2048;
   save();const m=document.getElementById('apiSaveMsg');m.textContent='✅已保存';setTimeout(()=>m.textContent='',2000)}
 
-// ========== UI ==========
-function updatePlayerUI(){const p=state.player;document.getElementById('pName').textContent=p.name;document.getElementById('pRealm').textContent=p.realm;document.getElementById('hpBar').style.width=(p.hp/p.maxHp*100)+'%';document.getElementById('mpBar').style.width=(p.mp/p.maxMp*100)+'%';document.getElementById('expBar').style.width=(p.exp/p.maxExp*100)+'%'}
+// ========== UI更新 ==========
+function updatePlayerUI(){
+  const p=state.player;
+  document.getElementById('pName').textContent=p.name;
+  document.getElementById('pRealm').textContent=p.realm;
+  document.getElementById('hpBar').style.width=(p.hp/p.maxHp*100)+'%';
+  document.getElementById('mpBar').style.width=(p.mp/p.maxMp*100)+'%';
+  document.getElementById('expBar').style.width=(p.exp/p.maxExp*100)+'%';
+}
 
 function updateNpcCards(){
   const c=document.getElementById('npcCards'),e=document.getElementById('npcEmpty');
@@ -348,48 +489,192 @@ function updateNpcCards(){
     let tags=(n.tags||[]).map(t=>`<span class="tag tag-p">${t}</span>`).join('');
     tags+=`<span class="tag tag-c">${rel.type}</span>`;
     if(preg?.active)tags+=`<span class="tag tag-g">孕育${preg.days}天</span>`;
-    return `<div class="card"><div class="cn">${n.name}</div><div class="cr">${n.gender}·${n.realm}·${n.role||'散修'}</div><div class="cd">${n.personality||''}</div><div class="ctags">${tags}</div><div style="margin-top:6px"><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--dim)"><span>好感</span><span>${rel.love}/100</span></div><div class="rel-bar"><div class="rel-fill" style="width:${rel.love}%"></div></div></div><div class="cbtns"><button onclick="startChat('${n.id}')">💬</button><button onclick="viewStatus('${n.id}')">🔮</button><button onclick="userCheck('${n.id}')">🔍</button><button onclick="openNpcModal('${n.id}')">✏️</button><button class="bdel" onclick="deleteNpc('${n.id}')">🗑️</button></div></div>`}).join('')}
+    return `<div class="card"><div class="cn">${n.name}</div><div class="cr">${n.gender}·${n.realm}·${n.role||'散修'}</div><div class="cd">${n.personality||''}</div><div class="ctags">${tags}</div><div style="margin-top:6px"><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--dim)"><span>好感</span><span>${rel.love}/100</span></div><div class="rel-bar"><div class="rel-fill" style="width:${rel.love}%"></div></div></div><div class="cbtns"><button onclick="viewStatus('${n.id}')">🔮</button><button onclick="enhancedCheck('${n.id}')">👀</button><button onclick="openNpcModal('${n.id}')">✏️</button><button onclick="startChat('${n.id}')">💬</button><button class="bdel" onclick="deleteNpc('${n.id}')">🗑️</button></div></div>`}).join('')}
 
 function updateSelects(){
   const opts=state.npcs.map(n=>`<option value="${n.id}">${n.name}（${n.realm}）</option>`).join('');
-  ['chatSelect','msgSelect','dualSelect','seedSelect','realmCompanion','tribCompanion'].forEach(id=>{const s=document.getElementById(id);if(!s)return;const v=s.value;s.innerHTML=(id==='realmCompanion'||id==='tribCompanion'?'<option value="">'+(id==='tribCompanion'?'无人护法':'独自前往')+'</option>':'<option value="">选择对象</option>')+opts;if(v&&state.npcs.find(n=>n.id===v))s.value=v})}
+  ['chatSelect','msgSelect','dualSelect','realmCompanion','tribCompanion'].forEach(id=>{
+    const s=document.getElementById(id);if(!s)return;const v=s.value;
+    const def=id==='realmCompanion'?'独自前往':id==='tribCompanion'?'无人护法':'选择对象';
+    s.innerHTML=`<option value="">${def}</option>`+opts;
+    if(v&&state.npcs.find(n=>n.id===v))s.value=v;
+  });
+}
 
 function updateRelCards(){
   const c=document.getElementById('relCards'),e=document.getElementById('relEmpty'),entries=state.npcs.filter(n=>state.relations[n.id]);
   if(!entries.length){c.innerHTML='';e.style.display='block';return}e.style.display='none';
   c.innerHTML=entries.map(n=>{const r=state.relations[n.id],preg=state.pregnancies[n.id];let st=r.type;if(preg?.active)st+=`·有喜${preg.days}天`;
-    return `<div class="card"><div class="cn">${n.name}</div><div class="cr">${st}</div><div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim)"><span>❤️</span><span>${r.love}/100</span></div><div class="rel-bar"><div class="rel-fill" style="width:${r.love}%"></div></div></div>${preg?.active?`<div style="margin-top:6px;font-size:10px;color:var(--green)">🌱${preg.stage} 第${preg.days}天</div>`:''}<div class="cbtns" style="margin-top:8px"><button onclick="startChat('${n.id}')">💬</button><button onclick="viewStatus('${n.id}')">🔮</button><button onclick="userCheck('${n.id}')">🔍</button>${!preg?.active?`<button onclick="forcePreg('${n.id}')">🌱</button>`:`<button onclick="advPreg('${n.id}')">⏩</button>`}</div></div>`}).join('')}
+    return `<div class="card"><div class="cn">${n.name}</div><div class="cr">${st}</div><div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim)"><span>❤️</span><span>${r.love}/100</span></div><div class="rel-bar"><div class="rel-fill" style="width:${r.love}%"></div></div></div>${preg?.active?`<div style="margin-top:6px;font-size:10px;color:var(--green)">🌱${preg.stage} 第${preg.days}天</div>`:''}<div class="cbtns" style="margin-top:8px"><button onclick="startChat('${n.id}')">💬</button><button onclick="viewStatus('${n.id}')">🔮</button><button onclick="enhancedCheck('${n.id}')">👀</button></div></div>`}).join('')}
 
-function updateEvents(){const el=document.getElementById('eventLog'),e=document.getElementById('eventEmpty');if(!state.events.length){el.innerHTML='';e.style.display='block';return}e.style.display='none';el.innerHTML=state.events.slice().reverse().map(ev=>`<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px"><span style="color:var(--dim)">${ev.time}</span> <span style="color:var(--gold)">[${ev.type}]</span> ${ev.text}</div>`).join('')}
-function updatePills(){const el=document.getElementById('pillList');if(!state.pills.length){el.innerHTML='暂无';return}const c={};state.pills.forEach(p=>{c[p]=(c[p]||0)+1});el.innerHTML=Object.entries(c).map(([n,cnt])=>`<button class="abtn cyan" style="margin:2px" onclick="usePill('${n}')">${n}×${cnt}</button>`).join('')}
-function updateRealmBtns(){const el=document.getElementById('realmBtns'),ri=REALMS.indexOf(state.player.realm);el.innerHTML=REALMS_DB.map(r=>{const ok=ri>=r.level;return `<button ${ok?`onclick="enterRealm('${r.name}')"`:'disabled'} title="${r.desc}">${r.name}${ok?'':'🔒'}</button>`}).join('')}
-
+function updateEvents(){
+  const el=document.getElementById('eventLog'),e=document.getElementById('eventEmpty');
+  if(!state.events.length){el.innerHTML='';e.style.display='block';return}e.style.display='none';
+  el.innerHTML=state.events.slice().reverse().map(ev=>`<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px"><span style="color:var(--dim)">${ev.time}</span> <span style="color:var(--gold)">[${ev.type}]</span> ${ev.text}</div>`).join('');
+}
+function updatePills(){
+  const el=document.getElementById('pillList');
+  if(!state.pills.length){el.innerHTML='暂无';return}
+  const c={};state.pills.forEach(p=>{c[p]=(c[p]||0)+1});
+  el.innerHTML=Object.entries(c).map(([n,cnt])=>`<button class="abtn cyan" style="margin:2px" onclick="usePill('${n}')">${n}×${cnt}</button>`).join('');
+}
+function updateRealmBtns(){
+  const el=document.getElementById('realmBtns'),ri=REALMS.indexOf(state.player.realm);
+  el.innerHTML=REALMS_DB.map(r=>{const ok=ri>=r.level;return `<button ${ok?`onclick="enterRealm('${r.name}')"`:'disabled'} title="${r.desc}">${r.name}${ok?'':'🔒'}</button>`}).join('');
+}
 function updateBeastCards(){
   const c=document.getElementById('beastCards'),e=document.getElementById('beastEmpty');
   if(!state.beasts.length){c.innerHTML='';e.style.display='block';return}e.style.display='none';
   c.innerHTML=state.beasts.map((b,i)=>{
     const tc=b.type==='神兽'?'var(--gold)':b.type==='妖兽'?'var(--danger)':'var(--cyan)';
     const tagCls=b.type==='神兽'?'tag-o':b.type==='妖兽'?'tag-r':'tag-c';
-    return `<div class="card"><div class="cn" style="color:${tc}">${b.name}</div><div class="cr">${b.type} · 战力${b.power} · 忠诚${b.loyalty}/100</div><div class="ctags"><span class="tag ${tagCls}">${b.type}</span><span class="tag tag-c">${b.tamed?'已驯服':'未驯服'}</span></div><div class="cbtns"><button onclick="trainBeast(${i})">🎯训练</button><button onclick="feedBeast(${i})">💊喂丹</button><button class="bdel" onclick="releaseBeast(${i})">放生</button></div></div>`}).join('')}
+    return `<div class="card"><div class="cn" style="color:${tc}">${b.name}</div><div class="cr">${b.type} · 战力${b.power} · 忠诚${b.loyalty}/100</div><div class="ctags"><span class="tag ${tagCls}">${b.type}</span><span class="tag tag-c">${b.tamed?'已驯服':'未驯服'}</span></div><div class="cbtns"><button onclick="trainBeast(${i})">🎯训练</button><button onclick="feedBeast(${i})">💊喂丹</button><button class="bdel" onclick="releaseBeast(${i})">放生</button></div></div>`}).join('');
+}
 
 function addEvent(t,x){state.events.push({type:t,text:x,time:new Date().toLocaleString('zh-CN')});if(state.events.length>200)state.events.shift();save();updateEvents()}
 function refreshAll(){updatePlayerUI();updateNpcCards();updateSelects();updateRelCards();updateEvents();updatePills();updateRealmBtns();updateBeastCards()}
 
-// ========== NPC ==========
+// ========== NPC管理 ==========
 function openNpcModal(id){
   document.getElementById('npcModal').classList.add('show');
-  if(id){const n=state.npcs.find(x=>x.id===id);if(!n)return;document.getElementById('npcModalTitle').textContent='✏️编辑';document.getElementById('editNpcId').value=id;document.getElementById('npcName').value=n.name;document.getElementById('npcGender').value=n.gender;document.getElementById('npcRealm').value=n.realm;document.getElementById('npcRole').value=n.role||'';document.getElementById('npcPersonality').value=n.personality||'';document.getElementById('npcRelType').value=state.relations[id]?.type||'陌生人';document.getElementById('npcRelMode').value=n.relMode||'可攻略';document.getElementById('npcTags').value=(n.tags||[]).join(',');document.getElementById('npcSysPrompt').value=n.sysPrompt||''}
-  else{document.getElementById('npcModalTitle').textContent='✨新建';document.getElementById('editNpcId').value='';['npcName','npcRole','npcPersonality','npcTags','npcSysPrompt'].forEach(x=>document.getElementById(x).value='');document.getElementById('npcGender').value='男';document.getElementById('npcRealm').value='金丹期';document.getElementById('npcRelType').value='陌生人';document.getElementById('npcRelMode').value='可攻略'}}
+  if(id){
+    const n=state.npcs.find(x=>x.id===id);if(!n)return;
+    document.getElementById('npcModalTitle').textContent='✏️编辑角色';
+    document.getElementById('editNpcId').value=id;
+    document.getElementById('npcName').value=n.name;
+    document.getElementById('npcGender').value=n.gender;
+    document.getElementById('npcRealm').value=n.realm;
+    document.getElementById('npcRole').value=n.role||'';
+    document.getElementById('npcPersonality').value=n.personality||'';
+    document.getElementById('npcRelType').value=state.relations[id]?.type||'陌生人';
+    document.getElementById('npcRelMode').value=n.relMode||'可攻略';
+    document.getElementById('npcTags').value=(n.tags||[]).join(',');
+    document.getElementById('npcSysPrompt').value=n.sysPrompt||'';
+  }else{
+    document.getElementById('npcModalTitle').textContent='✨新建角色';
+    document.getElementById('editNpcId').value='';
+    ['npcName','npcRole','npcPersonality','npcTags','npcSysPrompt'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('npcGender').value='男';
+    document.getElementById('npcRealm').value='金丹期';
+    document.getElementById('npcRelType').value='陌生人';
+    document.getElementById('npcRelMode').value='可攻略';
+  }
+}
 function closeNpcModal(){document.getElementById('npcModal').classList.remove('show')}
+
 function saveNpc(){
   const name=document.getElementById('npcName').value.trim();if(!name)return alert('输入名字');
-  const eid=document.getElementById('editNpcId').value,d={id:eid||'npc_'+Date.now(),name,gender:document.getElementById('npcGender').value,realm:document.getElementById('npcRealm').value,role:document.getElementById('npcRole').value.trim(),personality:document.getElementById('npcPersonality').value.trim(),relMode:document.getElementById('npcRelMode').value,tags:document.getElementById('npcTags').value.split(/[,，]/).map(s=>s.trim()).filter(Boolean),sysPrompt:document.getElementById('npcSysPrompt').value.trim()},rt=document.getElementById('npcRelType').value;
-  if(eid){const i=state.npcs.findIndex(n=>n.id===eid);if(i>=0)state.npcs[i]={...state.npcs[i],...d}}else{state.npcs.push(d);state.relations[d.id]={type:rt,love:rt==='道侣'?80:rt==='暧昧'?50:10};addEvent('角色',`${name}出现了`)}
-  if(!state.relations[d.id])state.relations[d.id]={type:rt,love:10};else state.relations[d.id].type=rt;
-  save();closeNpcModal();refreshAll()}
-function deleteNpc(id){const n=state.npcs.find(x=>x.id===id);if(!n||!confirm(`删除「${n.name}」？`))return;state.npcs=state.npcs.filter(x=>x.id!==id);delete state.relations[id];delete state.chatHistories[id];delete state.msgHistories[id];delete state.pregnancies[id];save();refreshAll();addEvent('角色',`${n.name}离开了`)}
+  const eid=document.getElementById('editNpcId').value;
+  const d={
+    id:eid||'npc_'+Date.now(),name,
+    gender:document.getElementById('npcGender').value,
+    realm:document.getElementById('npcRealm').value,
+    role:document.getElementById('npcRole').value.trim(),
+    personality:document.getElementById('npcPersonality').value.trim(),
+    relMode:document.getElementById('npcRelMode').value,
+    tags:document.getElementById('npcTags').value.split(/[,，]/).map(s=>s.trim()).filter(Boolean),
+    sysPrompt:document.getElementById('npcSysPrompt').value.trim()
+  };
+  const rt=document.getElementById('npcRelType').value;
+  if(eid){const i=state.npcs.findIndex(n=>n.id===eid);if(i>=0)state.npcs[i]={...state.npcs[i],...d}}
+  else{state.npcs.push(d);state.relations[d.id]={type:rt,love:rt==='道侣'?80:rt==='暧昧'?50:rt==='青梅竹马'?60:10};addEvent('角色',`${name}出现了`)}
+  if(!state.relations[d.id])state.relations[d.id]={type:rt,love:10};
+  else state.relations[d.id].type=rt;
+  save();closeNpcModal();refreshAll();
+}
 
-// ========== AI ==========
+function deleteNpc(id){
+  const n=state.npcs.find(x=>x.id===id);
+  if(!n||!confirm(`确定删除「${n.name}」？\n聊天记录也会一起删除哦`))return;
+  state.npcs=state.npcs.filter(x=>x.id!==id);
+  delete state.relations[id];delete state.chatHistories[id];
+  delete state.msgHistories[id];delete state.pregnancies[id];
+  if(currentChatId===id){currentChatId=null;loadChat()}
+  if(currentMsgId===id){currentMsgId=null;loadMsgChat()}
+  save();refreshAll();addEvent('角色',`${n.name}离开了`);
+  showToast(`${n.name}已删除`);
+}
+
+// ========== AI生成NPC ==========
+async function aiGenerateNpc(){
+  if(!state.api.url||!state.api.key)return alert('请先在设置里配置API');
+  document.getElementById('aiGenModal').classList.add('show');
+  document.getElementById('aiGenResult').style.display='none';
+  document.getElementById('aiGenActions').style.display='none';
+  document.getElementById('aiGenHint').value='';
+  aiGenTemp=null;
+}
+
+async function doAiGenerate(){
+  const hint=document.getElementById('aiGenHint').value.trim();
+  const btn=document.getElementById('aiGenBtn');
+  const resEl=document.getElementById('aiGenResult');
+  const actEl=document.getElementById('aiGenActions');
+  btn.disabled=true;btn.textContent='🎲 生成中…';
+  resEl.style.display='block';resEl.innerHTML='<span style="color:var(--dim)">AI正在构思角色…</span>';
+  actEl.style.display='none';
+
+  const prompt=`你是修仙世界角色生成器。请生成一个修仙世界NPC角色。${hint?'用户要求：'+hint:'随机生成一个有趣的角色。'}
+请严格按以下JSON格式返回，不要有其他内容：
+{"name":"角色名","gender":"男或女","realm":"境界（练气期/筑基期/金丹期/元婴期/化神期/合体期/大乘期/渡劫期/仙人之一）","role":"身份（如剑修、丹师、魔道少主等）","personality":"详细的性格与外貌描述（100-200字，要有特色）","tags":["标签1","标签2","标签3"],"relType":"初始关系（陌生人/同门/青梅竹马/宿敌/暧昧之一）","sysPrompt":"给AI的额外扮演指令（可选，让角色更有特色）"}
+要求：角色要有鲜明个性，不要太套路。`;
+
+  try{
+    const r=await fetch(getApiUrl(),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.api.key},
+      body:JSON.stringify({model:state.api.model,messages:[{role:'user',content:prompt}],max_tokens:800,temperature:1.0})});
+    if(!r.ok)throw new Error(r.status+' '+r.statusText);
+    const d=await r.json(),reply=d.choices?.[0]?.message?.content||'';
+    // 提取JSON
+    const jsonMatch=reply.match(/\{[\s\S]*\}/);
+    if(!jsonMatch)throw new Error('AI返回格式异常');
+    const npcData=JSON.parse(jsonMatch[0]);
+    aiGenTemp=npcData;
+    resEl.innerHTML=`<div style="padding:10px;background:rgba(160,112,224,.08);border:1px solid rgba(160,112,224,.15);border-radius:8px">
+      <div style="font-size:14px;font-weight:bold;color:var(--cyan)">${npcData.name}</div>
+      <div style="font-size:10px;color:var(--gold);margin-top:2px">${npcData.gender}·${npcData.realm}·${npcData.role||'散修'}</div>
+      <div style="font-size:11px;margin-top:6px;line-height:1.6">${npcData.personality||''}</div>
+      <div style="margin-top:6px">${(npcData.tags||[]).map(t=>'<span class="tag tag-p">'+t+'</span>').join(' ')}</div>
+      <div style="font-size:10px;color:var(--dim);margin-top:4px">关系：${npcData.relType||'陌生人'}</div>
+    </div>`;
+    actEl.style.display='block';
+  }catch(e){
+    resEl.innerHTML=`<span style="color:var(--danger)">生成失败：${e.message}</span>`;
+  }
+  btn.disabled=false;btn.textContent='🎲 生成';
+}
+
+function acceptAiNpc(){
+  if(!aiGenTemp)return;
+  const d=aiGenTemp,id='npc_'+Date.now();
+  const npc={id,name:d.name,gender:d.gender||'男',realm:d.realm||'金丹期',role:d.role||'',personality:d.personality||'',relMode:'可攻略',tags:d.tags||[],sysPrompt:d.sysPrompt||''};
+  const rt=d.relType||'陌生人';
+  state.npcs.push(npc);
+  state.relations[id]={type:rt,love:rt==='道侣'?80:rt==='暧昧'?50:rt==='青梅竹马'?60:10};
+  addEvent('角色',`${npc.name}出现了（AI生成）`);
+  save();refreshAll();
+  document.getElementById('aiGenModal').classList.remove('show');
+  showToast(`✨ ${npc.name}加入了你的世界！`);
+  screenFlash('var(--purple)',`${npc.name} 降临！`);
+  aiGenTemp=null;
+}
+
+function editAiNpc(){
+  if(!aiGenTemp)return;
+  document.getElementById('aiGenModal').classList.remove('show');
+  openNpcModal();
+  const d=aiGenTemp;
+  document.getElementById('npcName').value=d.name||'';
+  document.getElementById('npcGender').value=d.gender||'男';
+  document.getElementById('npcRealm').value=d.realm||'金丹期';
+  document.getElementById('npcRole').value=d.role||'';
+  document.getElementById('npcPersonality').value=d.personality||'';
+  document.getElementById('npcRelType').value=d.relType||'陌生人';
+  document.getElementById('npcTags').value=(d.tags||[]).join(',');
+  document.getElementById('npcSysPrompt').value=d.sysPrompt||'';
+  aiGenTemp=null;
+}
+
+// ========== AI调用 ==========
 let currentChatId=null,currentMsgId=null;
 function startChat(id){currentChatId=id;document.getElementById('chatSelect').value=id;switchPage('interact');loadChat()}
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*(.*?)\*/g,'<em style="color:var(--pink)">$1</em>').replace(/【(.*?)】/g,'<span style="color:var(--gold);font-size:10px">【$1】</span>')}
@@ -400,7 +685,8 @@ function loadChat(){
   const rel=state.relations[npc.id]||{};info.textContent=`${npc.realm}·${rel.type||'?'}·❤️${rel.love||0}`;
   const h=state.chatHistories[currentChatId]||[];
   box.innerHTML=h.length?h.filter(m=>m.role!=='system').map(m=>`<div class="msg ${m.role==='user'?'user':'ai'}"><div class="ms">${m.role==='user'?state.player.name:npc.name}</div>${esc(m.content)}</div>`).join(''):`<div class="msg sys">与「${npc.name}」的故事开始…</div>`;
-  box.scrollTop=box.scrollHeight}
+  box.scrollTop=box.scrollHeight;
+}
 
 function loadMsgChat(){
   const box=document.getElementById('msgMsgBox'),npc=state.npcs.find(n=>n.id===currentMsgId),info=document.getElementById('msgInfo');
@@ -408,28 +694,41 @@ function loadMsgChat(){
   info.textContent=`传讯→${npc.name}`;
   const h=state.msgHistories[currentMsgId]||[];
   box.innerHTML=h.length?h.filter(m=>m.role!=='system').map(m=>`<div class="msg ${m.role==='user'?'user':'ai msg-remote'}"><div class="ms">${m.role==='user'?state.player.name:npc.name}</div>${esc(m.content)}</div>`).join(''):`<div class="msg sys">📨与「${npc.name}」传讯…</div>`;
-  box.scrollTop=box.scrollHeight}
+  box.scrollTop=box.scrollHeight;
+}
 
 function parseReply(npcId,reply){
   const lm=reply.match(/【好感([+-]\d+)】/);
-  if(lm){const d=parseInt(lm[1]),rel=state.relations[npcId];if(rel){rel.love=Math.max(0,Math.min(100,rel.love+d));if(rel.love>=90&&rel.type!=='道侣'){rel.type='道侣';addEvent('关系',`${state.npcs.find(n=>n.id===npcId)?.name}与你结为道侣！`)}else if(rel.love>=60&&['陌生人','同门'].includes(rel.type))rel.type='暧昧'}}
-  if((reply.includes('受孕')||reply.includes('怀孕')||reply.includes('播种成功'))&&!state.pregnancies[npcId]?.active){state.pregnancies[npcId]={active:true,days:1,stage:'初期'};addEvent('大事',`${state.npcs.find(n=>n.id===npcId)?.name}怀孕了！`)}
-  if(reply.includes('【赶来】'))addEvent('事件',`${state.npcs.find(n=>n.id===npcId)?.name}正赶来！`)}
+  if(lm){const d=parseInt(lm[1]),rel=state.relations[npcId];
+    if(rel){
+      const old=rel.love;
+      rel.love=Math.max(0,Math.min(100,rel.love+d));
+      if(d>0)floatNum(`❤️+${d}`,'var(--pink)',window.innerWidth/2,window.innerHeight*0.3);
+      else if(d<0)floatNum(`💔${d}`,'var(--danger)',window.innerWidth/2,window.innerHeight*0.3);
+      if(rel.love>=90&&rel.type!=='道侣'){rel.type='道侣';addEvent('关系',`${state.npcs.find(n=>n.id===npcId)?.name}与你结为道侣！`);screenFlash('var(--pink)','💕 结为道侣！')}
+      else if(rel.love>=60&&['陌生人','同门','青梅竹马'].includes(rel.type))rel.type='暧昧';
+    }
+  }
+  if(reply.includes('【赶来】'))addEvent('事件',`${state.npcs.find(n=>n.id===npcId)?.name}正赶来！`);
+}
 
 async function callAI(npc,history,mode,box,onDone){
   if(!state.api.url||!state.api.key)return alert('请先配置API');
   const msgs=[{role:'system',content:buildSys(npc,mode)},...history.slice(-20)];
-  const ld=document.createElement('div');ld.className='msg ai'+(mode==='remote'?' msg-remote':'');
+  const ld=document.createElement('div');
+  ld.className='msg ai'+(mode==='remote'?' msg-remote':'');
   ld.innerHTML=`<div class="ms">${npc.name}</div><span style="color:var(--dim)">回应中…</span>`;
   box.appendChild(ld);box.scrollTop=box.scrollHeight;
   try{
-    const r=await fetch(getApiUrl(),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.api.key},body:JSON.stringify({model:state.api.model,messages:msgs,max_tokens:parseInt(state.api.maxTokens)||2048,temperature:.85})});
+    const r=await fetch(getApiUrl(),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.api.key},
+      body:JSON.stringify({model:state.api.model,messages:msgs,max_tokens:parseInt(state.api.maxTokens)||2048,temperature:.85})});
     if(!r.ok)throw new Error(r.status+' '+r.statusText);
     const d=await r.json(),reply=d.choices?.[0]?.message?.content||'（无回应）';
     ld.innerHTML=`<div class="ms">${npc.name}</div>${esc(reply)}`;
     parseReply(npc.id,reply);if(onDone)onDone(reply);save();
   }catch(e){ld.innerHTML=`<div class="ms">系统</div><span style="color:var(--danger)">失败：${e.message}</span>`}
-  box.scrollTop=box.scrollHeight;refreshAll()}
+  box.scrollTop=box.scrollHeight;refreshAll();
+}
 
 async function callAIModal(npc,mode,el){
   if(!state.api.url||!state.api.key)return alert('请先配置API');
@@ -437,33 +736,54 @@ async function callAIModal(npc,mode,el){
   const prompt=mode==='status'?'描述你此刻的状态和内心。':mode==='npc-check'?`*${npc.name}突然查岗*`:`*${state.player.name}来查岗*`;
   const msgs=[{role:'system',content:buildSys(npc,mode)},{role:'user',content:prompt}];
   try{
-    const r=await fetch(getApiUrl(),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.api.key},body:JSON.stringify({model:state.api.model,messages:msgs,max_tokens:parseInt(state.api.maxTokens)||2048,temperature:.85})});
+    const r=await fetch(getApiUrl(),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.api.key},
+      body:JSON.stringify({model:state.api.model,messages:msgs,max_tokens:parseInt(state.api.maxTokens)||2048,temperature:.85})});
     if(!r.ok)throw new Error(r.status);
     const d=await r.json(),reply=d.choices?.[0]?.message?.content||'（无回应）';
     el.innerHTML=esc(reply);parseReply(npc.id,reply);save();refreshAll();
-  }catch(e){el.innerHTML=`<span style="color:var(--danger)">失败：${e.message}</span>`}}
+  }catch(e){el.innerHTML=`<span style="color:var(--danger)">失败：${e.message}</span>`}
+}
 
-// ========== 发送 ==========
+// ========== 发送（修复bug：sending锁） ==========
 async function sendChat(text){
-  if(!currentChatId)return alert('选择NPC');const npc=state.npcs.find(n=>n.id===currentChatId);if(!npc)return;
+  if(!currentChatId)return alert('选择NPC');
+  if(sending)return; // 防重复
+  const npc=state.npcs.find(n=>n.id===currentChatId);if(!npc)return;
+  sending=true;
   const box=document.getElementById('msgBox');
+  const btn=document.getElementById('sendBtn');
+  btn.disabled=true;
   if(!state.chatHistories[currentChatId])state.chatHistories[currentChatId]=[];
   state.chatHistories[currentChatId].push({role:'user',content:text});
-  box.innerHTML+=`<div class="msg user"><div class="ms">${state.player.name}</div>${esc(text)}</div>`;box.scrollTop=box.scrollHeight;
+  box.innerHTML+=`<div class="msg user"><div class="ms">${state.player.name}</div>${esc(text)}</div>`;
+  box.scrollTop=box.scrollHeight;
   state.lastTalkTo=currentChatId;save();
-  document.getElementById('sendBtn').disabled=true;
-  await callAI(npc,state.chatHistories[currentChatId],'face',box,reply=>{state.chatHistories[currentChatId].push({role:'assistant',content:reply})});
-  document.getElementById('sendBtn').disabled=false;maybeJealousy()}
+  await callAI(npc,state.chatHistories[currentChatId],'face',box,reply=>{
+    state.chatHistories[currentChatId].push({role:'assistant',content:reply});
+  });
+  btn.disabled=false;
+  sending=false;
+  maybeJealousy();
+}
 
 async function sendRemote(text){
-  if(!currentMsgId)return alert('选择传讯对象');const npc=state.npcs.find(n=>n.id===currentMsgId);if(!npc)return;
+  if(!currentMsgId)return alert('选择传讯对象');
+  if(sending)return;
+  const npc=state.npcs.find(n=>n.id===currentMsgId);if(!npc)return;
+  sending=true;
   const box=document.getElementById('msgMsgBox');
+  const btn=document.getElementById('msgSendBtn');
+  btn.disabled=true;
   if(!state.msgHistories[currentMsgId])state.msgHistories[currentMsgId]=[];
   state.msgHistories[currentMsgId].push({role:'user',content:text});
-  box.innerHTML+=`<div class="msg user"><div class="ms">${state.player.name}</div>${esc(text)}</div>`;box.scrollTop=box.scrollHeight;
-  document.getElementById('msgSendBtn').disabled=true;
-  await callAI(npc,state.msgHistories[currentMsgId],'remote',box,reply=>{state.msgHistories[currentMsgId].push({role:'assistant',content:reply})});
-  document.getElementById('msgSendBtn').disabled=false}
+  box.innerHTML+=`<div class="msg user"><div class="ms">${state.player.name}</div>${esc(text)}</div>`;
+  box.scrollTop=box.scrollHeight;
+  await callAI(npc,state.msgHistories[currentMsgId],'remote',box,reply=>{
+    state.msgHistories[currentMsgId].push({role:'assistant',content:reply});
+  });
+  btn.disabled=false;
+  sending=false;
+}
 
 // ========== 内心/查岗 ==========
 async function viewStatus(id){
@@ -472,107 +792,217 @@ async function viewStatus(id){
   const el=document.getElementById('statusContent');
   const rel=state.relations[id]||{type:'?',love:0},preg=state.pregnancies[id];
   let base=`<div style="margin-bottom:10px;padding:8px;background:rgba(92,224,216,.05);border-radius:8px;font-size:11px">❤️ 好感：<b style="color:var(--pink)">${rel.love}/100</b>（${rel.type}）`;
-  if(preg?.active)base+=`<br>灵胎已结：${preg.stage} 第${preg.days}天`;
+  if(preg?.active)base+=`<br>🌱 ${preg.stage} 第${preg.days}天`;
   base+=`</div><div id="statusAIContent">加载中…</div>`;
   el.innerHTML=base;document.getElementById('statusModal').classList.add('show');
-  await callAIModal(npc,'status',document.getElementById('statusAIContent'))}
-
-async function userCheck(id){
-  const npc=state.npcs.find(n=>n.id===id);if(!npc)return;
-  document.getElementById('checkTitle').textContent=`🔍 查${npc.name}的岗`;
-  const el=document.getElementById('checkContent');el.innerHTML='加载中…';
-  document.getElementById('checkModal').classList.add('show');
-  addEvent('查岗',`你查了${npc.name}的岗`);
-  await callAIModal(npc,'user-check',el)}
+  await callAIModal(npc,'status',document.getElementById('statusAIContent'));
+}
 
 function maybeJealousy(){
   const jealous=state.npcs.filter(n=>n.id!==currentChatId&&state.relations[n.id]&&state.relations[n.id].love>=50&&['暧昧','道侣'].includes(state.relations[n.id].type));
-  jealous.forEach(n=>{if(Math.random()<(state.relations[n.id].love>=80?.25:.1))setTimeout(()=>npcCheckUser(n.id),2000+Math.random()*3000)})}
+  jealous.forEach(n=>{if(Math.random()<(state.relations[n.id].love>=80?.25:.1))setTimeout(()=>npcCheckUser(n.id),2000+Math.random()*3000)});
+}
 
 async function npcCheckUser(id){
   const npc=state.npcs.find(n=>n.id===id);if(!npc)return;
   const tt=state.npcs.find(n=>n.id===currentChatId);
   addEvent('查岗',`${npc.name}吃醋查岗！${tt?'发现你和'+tt.name+'聊天':''}`);
-  const box=document.getElementById('msgBox');
-  const s=document.createElement('div');s.className='msg sys';s.textContent=`⚠️ ${npc.name}突然出现了！`;
-  box.appendChild(s);box.scrollTop=box.scrollHeight;
+  showToast(`😤 ${npc.name}吃醋了！`,()=>{document.getElementById('checkModal').classList.add('show')});
   document.getElementById('checkTitle').textContent=`😤 ${npc.name}查岗！`;
   const el=document.getElementById('checkContent');el.innerHTML='加载中…';
   document.getElementById('checkModal').classList.add('show');
-  await callAIModal(npc,'npc-check',el)}
+  await callAIModal(npc,'npc-check',el);
+}
 
-// ========== 怀孕 ==========
-function forcePreg(id){
-  const npc=state.npcs.find(n=>n.id===id);if(!npc)return;
-  if(state.pregnancies[id]?.active)return alert(`${npc.name}已怀孕`);
-  if(!confirm(`对「${npc.name}」播种？`))return;
-  state.pregnancies[id]={active:true,days:1,stage:'初期'};
-  addEvent('大事',`对${npc.name}施展播种术！`);save();refreshAll();
-  if(currentChatId===id)sendChat(`*灵力暴涌，播种术法灌入${npc.name}体内* 乖，给我怀上。`)}
+// ========== NPC自主行为 ==========
+function npcAutonomyTick(){
+  state.npcs.forEach(npc=>{
+    const rel=state.relations[npc.id];if(!rel)return;
+    // 高好感NPC主动传讯
+    if(rel.love>=50&&Math.random()<0.6){
+      const msgs=[
+        `${state.player.name}，今日可有空闲？`,
+        `方才修炼时想起你了…`,
+        `我炼了些丹药，要不要来取？`,
+        rel.love>=80?`想你了…什么时候来看我？`:`近来可好？`,
+        `今日天气甚好，要不要一起出去走走？`,
+        `我发现了一处灵泉，要一起去看看吗？`
+      ];
+      const msg=msgs[Math.floor(Math.random()*msgs.length)];
+      if(!state.msgHistories[npc.id])state.msgHistories[npc.id]=[];
+      state.msgHistories[npc.id].push({role:'assistant',content:msg});
+      showToast(`📨 ${npc.name}：${msg.slice(0,20)}…`,()=>{currentMsgId=npc.id;document.getElementById('msgSelect').value=npc.id;switchPage('interact');loadMsgChat()});
+      document.getElementById('notifChat').style.display='block';
+      addEvent('传讯',`${npc.name}主动传讯`);save();
+    }
+    // NPC之间争风吃醋
+    if(state.npcs.length>=2&&Math.random()<0.04){
+      const others=state.npcs.filter(n=>n.id!==npc.id&&(state.relations[n.id]?.love||0)>=50);
+      if(others.length&&rel.love>=60){
+        const target=others[Math.floor(Math.random()*others.length)];
+        addEvent('修罗场',`${npc.name}和${target.name}因你起了争执！`);
+        rel.love=Math.max(0,rel.love-2);
+        state.relations[target.id].love=Math.max(0,state.relations[target.id].love-2);
+        showToast(`⚡ ${npc.name}和${target.name}吵起来了！`);
+        save();refreshAll();
+      }
+    }
+  });
+}
 
-function advPreg(id){
-  const preg=state.pregnancies[id];if(!preg?.active)return;preg.days+=30;
-  if(preg.days<=90)preg.stage='初期（1-3月）';
-  else if(preg.days<=180)preg.stage='中期（4-6月）';
-  else if(preg.days<=270)preg.stage='晚期（7-9月）';
-  else{preg.stage='即将临盆';if(preg.days>300){preg.active=false;preg.stage='已诞下灵婴';const npc=state.npcs.find(n=>n.id===id);addEvent('大事',`${npc?.name}诞下灵婴！`)}}
-  save();refreshAll();const npc=state.npcs.find(n=>n.id===id);addEvent('孕期',`${npc?.name}：${preg.stage}（第${preg.days}天）`)}
+// ========== 随机事件系统 ==========
+function triggerRandomEvent(){
+  if(document.getElementById('eventModal').classList.contains('show'))return;
+  // NPC来访事件
+  if(Math.random()<0.3){
+    const candidates=state.npcs.filter(n=>(state.relations[n.id]?.love||0)>=30);
+    if(candidates.length){
+      const npc=candidates[Math.floor(Math.random()*candidates.length)];
+      const rel=state.relations[npc.id];
+      showEventModal({
+        title:`💕 ${npc.name}来了`,
+        desc:`${npc.name}突然出现在你面前，${rel.love>=70?'脸颊微红，似乎有话想说':'神色淡然地看着你'}。`,
+        choices:[
+          {text:'🤗 拥入怀中',action:()=>{rel.love=Math.min(100,rel.love+5);save();refreshAll();floatNum('❤️+5','var(--pink)',window.innerWidth/2,window.innerHeight*0.3);startChat(npc.id)}},
+          {text:'💬 聊聊天',action:()=>startChat(npc.id)},
+          {text:'🙄 现在有点忙…',action:()=>{rel.love=Math.max(0,rel.love-3);save();refreshAll();floatNum('💔-3','var(--danger)',window.innerWidth/2,window.innerHeight*0.3)}}
+        ]
+      });return;
+    }
+  }
+  // 普通随机事件
+  const evt=RANDOM_EVENTS[Math.floor(Math.random()*RANDOM_EVENTS.length)];
+  showEventModal(evt);
+}
 
-// ========== 灵兽系统 ==========
+function showEventModal(evt){
+  const modal=document.getElementById('eventModal');
+  const content=document.getElementById('eventModalContent');
+  document.getElementById('eventModalTitle').textContent=evt.title;
+  let html=`<p style="font-size:12px;color:var(--text);margin-bottom:14px;line-height:1.6">${evt.desc}</p>`;
+  if(evt.choices[0]?.action){
+    // 简单选项（NPC来访等）
+    html+=evt.choices.map(c=>`<button class="event-choice" onclick="this.parentNode.querySelectorAll('button').forEach(b=>b.disabled=true);(${c.action.toString()})();setTimeout(()=>document.getElementById('eventModal').classList.remove('show'),500)">${c.text}</button>`).join('');
+  }else{
+    // 带概率的选项
+    html+=evt.choices.map((c,i)=>`<button class="event-choice" onclick="resolveRandomEvent(${i})">
+      ${c.text}
+      ${c.cost?`<div class="ec-cost">${Object.entries(c.cost).map(([k,v])=>k+(v>0?'+':'')+v).join(' ')}</div>`:''}
+    </button>`).join('');
+  }
+  html+='<div id="eventResult" style="margin-top:12px;display:none"></div>';
+  content.innerHTML=html;
+  modal.classList.add('show');
+  modal._evt=evt;
+}
+
+function resolveRandomEvent(idx){
+  const modal=document.getElementById('eventModal');
+  const evt=modal._evt;if(!evt)return;
+  const c=evt.choices[idx];
+  const resEl=document.getElementById('eventResult');
+  resEl.style.display='block';
+  // 禁用所有按钮
+  modal.querySelectorAll('.event-choice').forEach(b=>b.disabled=true);
+  // 扣费
+  const p=state.player;
+  if(c.cost){Object.entries(c.cost).forEach(([k,v])=>{if(k==='hp')p.hp=Math.max(1,p.hp+v);if(k==='mp')p.mp=Math.max(0,p.mp+v)})}
+  // 判定
+  const success=Math.random()<(c.chance||0.5);
+  if(success&&c.reward){
+    let txt='✨ 成功！';
+    if(c.reward.exp){p.exp+=c.reward.exp;txt+=` +${c.reward.exp}修为`}
+    if(c.reward.mp){p.mp=Math.min(p.maxMp,p.mp+c.reward.mp);txt+=` +${c.reward.mp}灵力`}
+    if(c.reward.pill){state.pills.push(c.reward.pill);txt+=` 获得${c.reward.pill}`}
+    if(c.reward.love){
+      const loving=state.npcs.filter(n=>(state.relations[n.id]?.love||0)>=30);
+      if(loving.length){const ln=loving[Math.floor(Math.random()*loving.length)];state.relations[ln.id].love=Math.min(100,state.relations[ln.id].love+c.reward.love);txt+=` ${ln.name}好感+${c.reward.love}`}
+    }
+    if(c.reward.beast){
+      const td=BEAST_TYPES[0];const bn=td.names[Math.floor(Math.random()*td.names.length)];
+      const pw=td.power[0]+Math.floor(Math.random()*(td.power[1]-td.power[0]));
+      state.beasts.push({name:bn,type:td.type,power:pw,loyalty:50,tamed:true});
+      txt+=` 获得灵兽「${bn}」！`;
+    }
+    resEl.innerHTML=`<div style="color:var(--green)">${txt}</div>`;
+    addEvent('奇遇',txt);
+    screenFlash('var(--green)','');
+    checkBreakthrough(resEl);
+  }else if(!success&&c.failCost){
+    let txt='💥 失败…';
+    Object.entries(c.failCost).forEach(([k,v])=>{
+      if(k==='hp'){p.hp=Math.max(1,p.hp+v);txt+=` ${v}气血`}
+      if(k==='mp'){p.mp=Math.max(0,p.mp+v);txt+=` ${v}灵力`}
+      if(k==='exp'){p.exp=Math.max(0,p.exp+v);txt+=` ${v}修为`}
+    });
+    resEl.innerHTML=`<div style="color:var(--danger)">${txt}</div>`;
+    addEvent('事件',txt);
+  }else if(!success){
+    resEl.innerHTML=`<div style="color:var(--dim)">没什么特别的事发生。</div>`;
+  }else{
+    resEl.innerHTML=`<div style="color:var(--dim)">平安无事。</div>`;
+  }
+  save();refreshAll();
+  setTimeout(()=>modal.classList.remove('show'),2000);
+}
+
+// ========== 灵兽 ==========
 function catchBeast(){
   const p=state.player,ri=REALMS.indexOf(p.realm);
   if(p.mp<15){alert('灵力不足（需15）');return}
   p.mp-=15;
   const resEl=document.getElementById('beastResult');resEl.style.display='block';
-  // 根据境界决定遇到什么类型
   const roll=Math.random();
   let typeData;
-  if(roll<0.15&&ri>=4)typeData=BEAST_TYPES[2]; // 神兽
-  else if(roll<0.45&&ri>=2)typeData=BEAST_TYPES[1]; // 妖兽
-  else typeData=BEAST_TYPES[0]; // 灵兽
-
+  if(roll<0.15&&ri>=4)typeData=BEAST_TYPES[2];
+  else if(roll<0.45&&ri>=2)typeData=BEAST_TYPES[1];
+  else typeData=BEAST_TYPES[0];
   const bname=typeData.names[Math.floor(Math.random()*typeData.names.length)];
   const power=typeData.power[0]+Math.floor(Math.random()*(typeData.power[1]-typeData.power[0]));
   const tameChance=typeData.tame+ri*0.05;
-
   if(Math.random()<tameChance){
     const beast={name:bname,type:typeData.type,power,loyalty:typeData.type==='神兽'?60:typeData.type==='妖兽'?20:50,tamed:typeData.type!=='妖兽'};
     state.beasts.push(beast);
     resEl.innerHTML=`🎉 捕获成功！<b style="color:${typeData.color}">${bname}</b>（${typeData.type}）战力${power}`;
     addEvent('灵兽',`捕获了${typeData.type}「${bname}」！`);
+    screenFlash(typeData.color,`${bname} 收服！`);
   }else{
     resEl.innerHTML=`😢 ${typeData.type}「${bname}」逃跑了…${typeData.type==='妖兽'?'还被咬了一口！':''}`;
     if(typeData.type==='妖兽'){p.hp=Math.max(1,p.hp-15);resEl.innerHTML+=' (-15气血)'}
   }
-  save();refreshAll()}
+  save();refreshAll();
+}
 
 function trainBeast(i){
   const b=state.beasts[i];if(!b)return;
   const p=state.player;if(p.mp<10){alert('灵力不足');return}
   p.mp-=10;
   if(b.type==='妖兽'&&!b.tamed){
-    if(Math.random()<0.3){b.tamed=true;b.loyalty=30;addEvent('灵兽',`妖兽「${b.name}」被驯服了！`);alert(`${b.name}被驯服了！`)}
-    else{p.hp=Math.max(1,p.hp-10);alert(`${b.name}暴躁反抗！你受伤了 -10气血`)}
+    if(Math.random()<0.3){b.tamed=true;b.loyalty=30;addEvent('灵兽',`妖兽「${b.name}」被驯服了！`);showToast(`${b.name}被驯服了！`);screenFlash('var(--orange)','')}
+    else{p.hp=Math.max(1,p.hp-10);showToast(`${b.name}暴躁反抗！-10气血`)}
   }else{
-    b.power+=Math.floor(Math.random()*5)+1;
-    b.loyalty=Math.min(100,b.loyalty+5);
-    alert(`${b.name}训练完成！战力+${Math.floor(Math.random()*5)+1} 忠诚+5`);
+    const gain=Math.floor(Math.random()*5)+1;
+    b.power+=gain;b.loyalty=Math.min(100,b.loyalty+5);
+    showToast(`${b.name}训练完成！战力+${gain} 忠诚+5`);
   }
-  save();refreshAll()}
+  save();refreshAll();
+}
 
 function feedBeast(i){
   const b=state.beasts[i];if(!b)return;
   if(!state.pills.length){alert('没有丹药');return}
   const pill=state.pills.shift();
   b.power+=10;b.loyalty=Math.min(100,b.loyalty+10);
-  alert(`给${b.name}喂了${pill}，战力+10 忠诚+10`);
-  save();refreshAll();updatePills()}
+  showToast(`给${b.name}喂了${pill}，战力+10 忠诚+10`);
+  save();refreshAll();updatePills();
+}
 
 function releaseBeast(i){
   const b=state.beasts[i];if(!b||!confirm(`放生「${b.name}」？`))return;
-  state.beasts.splice(i,1);addEvent('灵兽',`放生了${b.name}`);save();refreshAll()}
+  state.beasts.splice(i,1);addEvent('灵兽',`放生了${b.name}`);save();refreshAll();
+}
 
-// ========== 修炼+渡劫 ==========
+// ========== 修炼 ==========
 function doCult(type){
   const p=state.player,ri=REALMS.indexOf(p.realm);
   let resEl=document.getElementById('res-'+type);
@@ -582,13 +1012,20 @@ function doCult(type){
     if(p.mp<10){resEl.textContent='灵力不足（需10）';return}
     p.mp-=10;const gain=10+ri*5+Math.floor(Math.random()*20);p.exp+=gain;
     resEl.textContent=`🧘 消耗10灵力，获得${gain}修为`;
+    floatNum(`+${gain}修为`,'var(--gold)',window.innerWidth/2,window.innerHeight*0.4);
     checkBreakthrough(resEl);addEvent('修炼','获得'+gain+'修为');
   }
   else if(type==='alchemy'){
     if(p.mp<15){resEl.textContent='灵力不足（需15）';return}
     p.mp-=15;const pill=PILLS_DB[Math.floor(Math.random()*PILLS_DB.length)];
-    if(Math.random()<(pill.rate+ri*0.05)){state.pills.push(pill.name);resEl.textContent=`⚗️ 成功！获得「${pill.name}」`;addEvent('炼丹',`炼制${pill.name}`)}
-    else{resEl.textContent='⚗️ 炼丹失败💥';addEvent('炼丹','失败')}
+    if(Math.random()<(pill.rate+ri*0.05)){
+      state.pills.push(pill.name);
+      resEl.textContent=`⚗️ 成功！获得「${pill.name}」`;
+      addEvent('炼丹',`炼制${pill.name}`);
+      screenFlash('var(--cyan)','');
+    }else{
+      resEl.textContent='⚗️ 炼丹失败💥';addEvent('炼丹','失败');
+    }
     updatePills();
   }
   else if(type==='dual'){
@@ -598,141 +1035,124 @@ function doCult(type){
     p.mp-=20;const rel=state.relations[tid]||{love:0};
     const gain=20+ri*8+Math.floor(rel.love/5);p.exp+=gain;rel.love=Math.min(100,rel.love+5);
     resEl.textContent=`💞 与${npc.name}双修，+${gain}修为 +5好感`;
-    if(Math.random()<.15&&!state.pregnancies[tid]?.active){state.pregnancies[tid]={active:true,days:1,stage:'初期'};resEl.textContent+=`\n🌱 ${npc.name}受孕了！`;addEvent('大事',`双修中${npc.name}受孕！`)}
+    floatNum(`+${gain}修为`,'var(--gold)',window.innerWidth*0.4,window.innerHeight*0.4);
+    floatNum('❤️+5','var(--pink)',window.innerWidth*0.6,window.innerHeight*0.4);
     checkBreakthrough(resEl);addEvent('双修',`与${npc.name}双修`);
-  }
-  else if(type==='seed'){
-    const tid=document.getElementById('seedSelect').value;if(!tid){resEl.textContent='选择目标';return}
-    const npc=state.npcs.find(n=>n.id===tid);if(!npc)return;
-    if(state.pregnancies[tid]?.active){resEl.textContent=`${npc.name}已怀孕`;return}
-    if(p.mp<30){resEl.textContent='灵力不足（需30）';return}
-    p.mp-=30;state.pregnancies[tid]={active:true,days:1,stage:'初期'};
-    resEl.textContent=`🌱 播种成功！${npc.name}受孕！`;
-    addEvent('大事',`对${npc.name}播种成功！`);
-    const rel=state.relations[tid];if(rel)rel.love=Math.max(0,rel.love-5);
   }
   else if(type==='study'){
     if(p.mp<10){resEl.textContent='灵力不足（需10）';return}
     p.mp-=10;
-    if(Math.random()<.15+ri*.02){const gain=30+ri*10;p.exp+=gain;resEl.textContent=`📖 参悟有成！+${gain}修为`;addEvent('参悟','有成')}
-    else{resEl.textContent='📖 未能领悟…';addEvent('参悟','失败')}
+    if(Math.random()<.15+ri*.02){
+      const gain=30+ri*10;p.exp+=gain;
+      resEl.textContent=`📖 参悟有成！+${gain}修为`;
+      addEvent('参悟','有成');screenFlash('var(--gold)','');
+      floatNum(`+${gain}修为`,'var(--gold)',window.innerWidth/2,window.innerHeight*0.4);
+    }else{resEl.textContent='📖 未能领悟…';addEvent('参悟','失败')}
   }
-  else if(type==='tribulation'){
-    doTribulation(resEl);return;
-  }
-  save();refreshAll()}
+  else if(type==='tribulation'){doTribulation(resEl);return}
+  save();refreshAll();
+}
 
 function checkBreakthrough(resEl){
   const p=state.player,ri=REALMS.indexOf(p.realm);
-  if(p.exp>=p.maxExp){p.exp-=p.maxExp;const ni=Math.min(ri+1,REALMS.length-1);if(ni>ri){p.realm=REALMS[ni];p.maxHp+=50;p.hp=p.maxHp;p.maxMp+=30;p.mp=p.maxMp;p.maxExp=Math.floor(p.maxExp*1.8);resEl.textContent+=`\n🎉 突破到${p.realm}！`;addEvent('突破',`突破到${p.realm}！`)}}}
+  if(p.exp>=p.maxExp){
+    p.exp-=p.maxExp;const ni=Math.min(ri+1,REALMS.length-1);
+    if(ni>ri){
+      p.realm=REALMS[ni];p.maxHp+=50;p.hp=p.maxHp;p.maxMp+=30;p.mp=p.maxMp;p.maxExp=Math.floor(p.maxExp*1.8);
+      resEl.textContent+=`\n🎉 突破到${p.realm}！`;
+      addEvent('突破',`突破到${p.realm}！`);
+      screenFlash('var(--gold)',`🎉 突破！${p.realm}`);
+    }
+  }
+}
 
-// ========== 渡劫系统 ==========
+// ========== 渡劫 ==========
 async function doTribulation(resEl){
   const p=state.player,ri=REALMS.indexOf(p.realm);
   if(ri<3){resEl.textContent='金丹期以下无需渡劫';return}
   if(p.exp<p.maxExp*0.8){resEl.textContent='修为不足（需80%以上）';return}
   if(p.mp<30){resEl.textContent='灵力不足（需30）';return}
   p.mp-=30;
-
   const compId=document.getElementById('tribCompanion').value;
   const comp=compId?state.npcs.find(n=>n.id===compId):null;
   const rel=comp?state.relations[comp.id]:null;
   const beastHelp=state.beasts.filter(b=>b.tamed&&b.loyalty>=50);
-
   resEl.innerHTML='';resEl.style.display='block';
   function log(t){resEl.innerHTML+=t+'<br>'}
-
   log(`⚡ 天劫降临！${p.name}开始渡劫…`);
+  screenFlash('var(--purple)','⚡ 天劫降临');
   if(comp)log(`💕 ${comp.name}在旁护法`);
   if(beastHelp.length)log(`🐾 ${beastHelp.map(b=>b.name).join('、')}守护在侧`);
-
   addEvent('渡劫',`${p.name}开始渡劫！${comp?comp.name+'护法':''}`);
-
   const thunders=3+Math.floor(ri/2);
-  let survived=true;
-  let companionBlocked=false;
-
+  let survived=true,companionBlocked=false;
   for(let i=0;i<thunders;i++){
     await new Promise(r=>setTimeout(r,600));
     const dmg=20+ri*10+Math.floor(Math.random()*30);
-    log(`\n⚡ 第${i+1}道天雷降下！威力${dmg}`);
-
-    // 道侣挡雷判定
+    log(`\n⚡ 第${i+1}道天雷！威力${dmg}`);
     if(comp&&rel&&!companionBlocked){
       const blockChance=rel.love>=80?0.6:rel.love>=60?0.3:0.1;
       if(Math.random()<blockChance){
         companionBlocked=true;
-        const compDmg=Math.floor(dmg*0.7);
-        log(`💕 <b style="color:var(--pink)">${comp.name}舍身为你挡下天雷！</b>受伤严重！`);
+        log(`💕 <b style="color:var(--pink)">${comp.name}舍身为你挡下天雷！</b>`);
         rel.love=Math.min(100,rel.love+15);
         addEvent('渡劫',`${comp.name}舍身挡雷！好感+15`);
-        // 如果有AI，让道侣说话
-        if(state.api.url&&state.api.key){
-          const box=resEl;
-          await callAI(comp,[{role:'user',content:`你在我渡劫时舍身挡了天雷，你现在怎么样？`}],'tribulation',{appendChild(el){log(el.innerHTML)},scrollTop:0,set scrollHeight(v){}},reply=>{
-            if(!state.chatHistories[comp.id])state.chatHistories[comp.id]=[];
-            state.chatHistories[comp.id].push({role:'user',content:'（渡劫中）你为我挡了天雷…'},{role:'assistant',content:reply});
-          });
-        }
+        screenFlash('var(--pink)','');
         continue;
       }
     }
-
-    // 灵兽挡雷
     let beastBlocked=false;
     for(const b of beastHelp){
       if(b.loyalty>=70&&Math.random()<0.3){
-        log(`🐾 ${b.name}冲出挡雷！`);
-        b.loyalty=Math.max(0,b.loyalty-10);
-        b.power=Math.max(1,b.power-5);
-        beastBlocked=true;break;
+        log(`🐾 ${b.name}冲出挡雷！`);b.loyalty=Math.max(0,b.loyalty-10);b.power=Math.max(1,b.power-5);beastBlocked=true;break;
       }
     }
     if(beastBlocked)continue;
-
-    // 玩家承受
     p.hp-=dmg;
-    log(`💥 你承受了${dmg}点雷伤！剩余气血${Math.max(0,p.hp)}`);
-
+    log(`💥 承受${dmg}点雷伤！剩余气血${Math.max(0,p.hp)}`);
     if(p.hp<=0){
       survived=false;
-      log(`\n<b style="color:var(--danger)">❌ 渡劫失败！你被天雷重创…</b>`);
-      p.hp=1;p.exp=0;
-      addEvent('渡劫','渡劫失败！重伤');
-      if(comp&&rel){
-        rel.love=Math.min(100,rel.love+5);
-        log(`${comp.name}将你救起，悉心照料…`);
-      }
+      log(`\n<b style="color:var(--danger)">❌ 渡劫失败！重伤…</b>`);
+      p.hp=1;p.exp=0;addEvent('渡劫','渡劫失败！');
+      screenFlash('var(--danger)','');
+      if(comp&&rel){rel.love=Math.min(100,rel.love+5);log(`${comp.name}将你救起…`)}
       break;
     }
   }
-
   if(survived){
     log(`\n<b style="color:var(--gold)">🎉 渡劫成功！天地共鸣！</b>`);
+    screenFlash('var(--gold)','🎉 渡劫成功！');
     const ni=Math.min(ri+1,REALMS.length-1);
     if(ni>ri){
       p.realm=REALMS[ni];p.maxHp+=80;p.hp=p.maxHp;p.maxMp+=50;p.mp=p.maxMp;p.maxExp=Math.floor(p.maxExp*2);p.exp=0;
       log(`突破到 <b style="color:var(--gold)">${p.realm}</b>！`);
-      addEvent('突破',`渡劫成功！突破到${p.realm}！`);
+      addEvent('突破',`渡劫突破到${p.realm}！`);
     }
-    // 灵兽也受益
     beastHelp.forEach(b=>{b.power+=5;b.loyalty=Math.min(100,b.loyalty+5)});
   }
-  save();refreshAll()}
+  save();refreshAll();
+}
 
 function usePill(name){
   const idx=state.pills.indexOf(name);if(idx<0)return;
   const pill=PILLS_DB.find(p=>p.name===name);if(!pill)return;
   state.pills.splice(idx,1);const p=state.player,resEl=document.getElementById('res-pill');resEl.style.display='block';
-  if(pill.effect==='hp'){p.hp=Math.min(p.maxHp,p.hp+pill.val);resEl.textContent=`💊 ${name}，+${pill.val}气血`}
-  else if(pill.effect==='mp'){p.mp=Math.min(p.maxMp,p.mp+pill.val);resEl.textContent=`💊 ${name}，+${pill.val}灵力`}
+  if(pill.effect==='hp'){p.hp=Math.min(p.maxHp,p.hp+pill.val);resEl.textContent=`💊 ${name}，+${pill.val}气血`;floatNum(`+${pill.val}气血`,'var(--green)',window.innerWidth/2,window.innerHeight*0.4)}
+  else if(pill.effect==='mp'){p.mp=Math.min(p.maxMp,p.mp+pill.val);resEl.textContent=`💊 ${name}，+${pill.val}灵力`;floatNum(`+${pill.val}灵力`,'var(--cyan)',window.innerWidth/2,window.innerHeight*0.4)}
   else if(pill.effect==='exp'){p.exp+=pill.val;resEl.textContent=`💊 ${name}，+${pill.val}修为`;checkBreakthrough(resEl)}
-  else if(pill.effect==='breakthrough'){const ri=REALMS.indexOf(p.realm);if(Math.random()<.3&&ri<REALMS.length-1){p.realm=REALMS[ri+1];p.maxHp+=50;p.hp=p.maxHp;p.maxMp+=30;p.mp=p.maxMp;p.maxExp=Math.floor(p.maxExp*1.8);resEl.textContent=`💊 突破到${p.realm}！`;addEvent('突破',`破境丹突破！`)}else resEl.textContent='💊 未能突破'}
+  else if(pill.effect==='breakthrough'){
+    const ri=REALMS.indexOf(p.realm);
+    if(Math.random()<.3&&ri<REALMS.length-1){
+      p.realm=REALMS[ri+1];p.maxHp+=50;p.hp=p.maxHp;p.maxMp+=30;p.mp=p.maxMp;p.maxExp=Math.floor(p.maxExp*1.8);
+      resEl.textContent=`💊 突破到${p.realm}！`;addEvent('突破','破境丹突破！');
+      screenFlash('var(--gold)',`突破！${p.realm}`);
+    }else resEl.textContent='💊 未能突破'
+  }
   else if(pill.effect==='love'){resEl.textContent='💊 合欢散请在对话中喂丹使用';state.pills.push(name)}
-  else if(pill.effect==='fertility'){resEl.textContent='💊 助孕丹已激活'}
-  save();refreshAll();updatePills()}
+  save();refreshAll();updatePills();
+}
 
-// ========== 秘境 ==========
+// ========== 秘境（带战斗选择） ==========
 async function enterRealm(name){
   const realm=REALMS_DB.find(r=>r.name===name);if(!realm)return;
   const compId=document.getElementById('realmCompanion').value;
@@ -748,17 +1168,33 @@ async function enterRealm(name){
     await new Promise(r=>setTimeout(r,800));
     const roll=Math.random();
     if(roll<.25){
-      const dmg=Math.floor(10+Math.random()*20*(realm.level+1));p.hp=Math.max(1,p.hp-dmg);
-      addLog(`⚔️ 第${i+1}层：遭遇妖兽！-${dmg}气血${comp?'，'+comp.name+'协助':''}`);
-      if(comp){const rel=state.relations[comp.id];if(rel)rel.love=Math.min(100,rel.love+2)}
-      // 灵兽参战
-      const fb=state.beasts.find(b=>b.tamed&&b.loyalty>=40);
-      if(fb){addLog(`🐾 ${fb.name}参战！`);fb.power+=1}
+      // 战斗遭遇 - 给玩家选择
+      const enemyPower=10+realm.level*15+Math.floor(Math.random()*20);
+      const enemyName=['妖兽','魔修','邪灵','幻兽'][Math.floor(Math.random()*4)];
+      addLog(`⚔️ 第${i+1}层：遭遇${enemyName}（战力${enemyPower}）！`);
+      const beastHelper=state.beasts.find(b=>b.tamed&&b.loyalty>=40);
+      const choice=await showBattleChoice(enemyName,beastHelper,log);
+      if(choice==='attack'){
+        const dmg=10+ri*8+Math.floor(Math.random()*15);
+        const eDmg=Math.floor(enemyPower*0.3+Math.random()*10);
+        p.hp=Math.max(1,p.hp-eDmg);
+        addLog(`🗡️ 你出手造成${dmg}伤害！但受到${eDmg}反击`);
+        if(comp){const rel=state.relations[comp.id];if(rel)rel.love=Math.min(100,rel.love+2)}
+        p.exp+=15+realm.level*5;
+      }else if(choice==='skill'){
+        if(p.mp>=15){p.mp-=15;addLog(`✨ 术法攻击！轻松击败`);p.exp+=25+realm.level*8}
+        else{addLog('灵力不足，只能硬拼！');p.hp=Math.max(1,p.hp-Math.floor(enemyPower*0.4))}
+      }else if(choice==='beast'&&beastHelper){
+        addLog(`🐾 ${beastHelper.name}出击！`);beastHelper.power+=1;p.exp+=20+realm.level*5;
+      }else if(choice==='flee'){
+        if(Math.random()<0.6){addLog('🏃 逃跑成功！');continue}
+        else{const eDmg=Math.floor(enemyPower*0.5);p.hp=Math.max(1,p.hp-eDmg);addLog(`逃跑失败！被追击 -${eDmg}气血`)}
+      }
     }else if(roll<.5){
       const reward=realm.rewards[Math.floor(Math.random()*realm.rewards.length)];
       const eg=15+realm.level*10+Math.floor(Math.random()*20);p.exp+=eg;
       addLog(`✨ 第${i+1}层：发现${reward}！+${eg}修为`);
-      // 万兽山可能遇到灵兽
+      floatNum(`+${eg}修为`,'var(--gold)',window.innerWidth/2,window.innerHeight*0.3);
       if(name==='万兽山'&&Math.random()<.4){
         const td=BEAST_TYPES[Math.floor(Math.random()*BEAST_TYPES.length)];
         const bn=td.names[Math.floor(Math.random()*td.names.length)];
@@ -771,44 +1207,88 @@ async function enterRealm(name){
     }else if(roll<.75&&comp){
       const rel=state.relations[comp.id];if(rel)rel.love=Math.min(100,rel.love+5);
       addLog(`💕 第${i+1}层：与${comp.name}亲密互动 +5好感`);
-      if(name==='双修秘境'&&Math.random()<.2&&!state.pregnancies[comp.id]?.active){
-        state.pregnancies[comp.id]={active:true,days:1,stage:'初期'};
-        addLog(`🌱 ${comp.name}受孕了！`);addEvent('大事',`秘境中${comp.name}受孕！`)}
-    }else{p.mp=Math.min(p.maxMp,p.mp+15);addLog(`🌿 第${i+1}层：灵泉 +15灵力`)}
-    if(p.exp>=p.maxExp){p.exp-=p.maxExp;const ni=Math.min(ri+1,REALMS.length-1);if(ni>REALMS.indexOf(p.realm)){p.realm=REALMS[ni];p.maxHp+=50;p.hp=p.maxHp;p.maxMp+=30;p.mp=p.maxMp;p.maxExp=Math.floor(p.maxExp*1.8);addLog(`🎉 突破到${p.realm}！`);addEvent('突破',`秘境突破！`)}}
-    save();refreshAll()}
+      floatNum('❤️+5','var(--pink)',window.innerWidth/2,window.innerHeight*0.3);
+    }else{
+      p.mp=Math.min(p.maxMp,p.mp+15);addLog(`🌿 第${i+1}层：灵泉 +15灵力`);
+    }
+    if(p.exp>=p.maxExp){
+      p.exp-=p.maxExp;const ni=Math.min(ri+1,REALMS.length-1);
+      if(ni>REALMS.indexOf(p.realm)){
+        p.realm=REALMS[ni];p.maxHp+=50;p.hp=p.maxHp;p.maxMp+=30;p.mp=p.maxMp;p.maxExp=Math.floor(p.maxExp*1.8);
+        addLog(`🎉 突破到${p.realm}！`);addEvent('突破','秘境突破！');
+        screenFlash('var(--gold)',`突破！${p.realm}`);
+      }
+    }
+    save();refreshAll();
+  }
   await new Promise(r=>setTimeout(r,500));
   addLog(`🏁 探索完毕！${comp?comp.name+'同归':'安全返回'}`);
   if(comp&&state.api.url&&state.api.key){
     addLog(`💬 ${comp.name}有话说…`);
-    await callAI(comp,[{role:'user',content:`我们闯完${name}了，感想？`}],'realm',log,reply=>{
+    await callAI(comp,[{role:'user',content:`我们闯完${name}了，感想？`}],'realm',{
+      appendChild(el){addLog(el.innerHTML)},scrollTop:0,set scrollHeight(v){}
+    },reply=>{
       if(!state.chatHistories[comp.id])state.chatHistories[comp.id]=[];
-      state.chatHistories[comp.id].push({role:'user',content:`（秘境归来）闯完${name}。`},{role:'assistant',content:reply})})}
-  save();refreshAll()}
+      state.chatHistories[comp.id].push({role:'user',content:`（秘境归来）闯完${name}。`},{role:'assistant',content:reply});
+    });
+  }
+  save();refreshAll();
+}
+
+function showBattleChoice(enemyName,beast,logEl){
+  return new Promise(resolve=>{
+    const el=document.createElement('div');el.className='battle-choices';
+    const btns=[
+      ['attack','🗡️ 攻击'],
+      ['skill','✨ 术法(-15灵力)'],
+      beast?['beast',`🐾 ${beast.name}出击`]:null,
+      ['flee','🏃 逃跑']
+    ].filter(Boolean);
+    btns.forEach(([val,label])=>{
+      const b=document.createElement('button');b.textContent=label;
+      b.onclick=()=>{el.remove();resolve(val)};
+      el.appendChild(b);
+    });
+    logEl.appendChild(el);logEl.scrollTop=99999;
+  });
+}
 
 // ========== 设置 ==========
 function loadSettings(){
-  document.getElementById('apiUrl').value=state.api.url||'';document.getElementById('apiKey').value=state.api.key||'';
-  document.getElementById('apiModel').value=state.api.model||'gpt-4o';document.getElementById('apiMaxTokens').value=state.api.maxTokens||2048;
-  document.getElementById('pcName').value=state.player.name||'';document.getElementById('pcGender').value=state.player.gender||'男';
-  document.getElementById('pcRealm').value=state.player.realm||'凡人';document.getElementById('pcDesc').value=state.player.desc||'';
-  document.getElementById('worldSetting').value=state.worldSetting||''}
+  document.getElementById('apiUrl').value=state.api.url||'';
+  document.getElementById('apiKey').value=state.api.key||'';
+  document.getElementById('apiModel').value=state.api.model||'gpt-4o';
+  document.getElementById('apiMaxTokens').value=state.api.maxTokens||2048;
+  document.getElementById('pcName').value=state.player.name||'';
+  document.getElementById('pcGender').value=state.player.gender||'女';
+  document.getElementById('pcRealm').value=state.player.realm||'凡人';
+  document.getElementById('pcDesc').value=state.player.desc||'';
+  document.getElementById('worldSetting').value=state.worldSetting||'';
+}
 function saveSettings(){
-  state.api.url=document.getElementById('apiUrl').value.trim();state.api.key=document.getElementById('apiKey').value.trim();
-  state.api.model=document.getElementById('apiModel').value.trim()||'gpt-4o';state.api.maxTokens=parseInt(document.getElementById('apiMaxTokens').value)||2048;
-  state.player.name=document.getElementById('pcName').value.trim()||'无名散修';state.player.gender=document.getElementById('pcGender').value;
-  state.player.realm=document.getElementById('pcRealm').value;state.player.desc=document.getElementById('pcDesc').value.trim();
+  state.api.url=document.getElementById('apiUrl').value.trim();
+  state.api.key=document.getElementById('apiKey').value.trim();
+  state.api.model=document.getElementById('apiModel').value.trim()||'gpt-4o';
+  state.api.maxTokens=parseInt(document.getElementById('apiMaxTokens').value)||2048;
+  state.player.name=document.getElementById('pcName').value.trim()||'无名仙子';
+  state.player.gender=document.getElementById('pcGender').value;
+  state.player.realm=document.getElementById('pcRealm').value;
+  state.player.desc=document.getElementById('pcDesc').value.trim();
   state.worldSetting=document.getElementById('worldSetting').value.trim();
-  save();refreshAll();const m=document.getElementById('saveMsg');m.textContent='✅已保存';setTimeout(()=>m.textContent='',2000)}
+  save();refreshAll();
+  const m=document.getElementById('saveMsg');m.textContent='✅已保存';setTimeout(()=>m.textContent='',2000);
+}
 
-// ========== 页面切换+事件绑定 ==========
+// ========== 页面切换 ==========
 function switchPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.getElementById('pg-'+name)?.classList.add('active');
-  document.querySelector(`.nb[data-page="${name}"]`)?.classList.add('active')}
+  document.querySelector(`.nb[data-page="${name}"]`)?.classList.add('active');
+  if(name==='interact')document.getElementById('notifChat').style.display='none';
+}
 
-// 子标签切换
+// ========== 事件绑定 ==========
 document.querySelectorAll('.subtab').forEach(btn=>{btn.addEventListener('click',function(){
   const parent=this.dataset.parent,sub=this.dataset.sub;
   const page=document.getElementById('pg-'+parent);if(!page)return;
@@ -821,32 +1301,439 @@ document.querySelectorAll('.subtab').forEach(btn=>{btn.addEventListener('click',
 document.querySelectorAll('.nb').forEach(btn=>{btn.addEventListener('click',()=>switchPage(btn.dataset.page))});
 document.getElementById('chatSelect').addEventListener('change',function(){if(this.value){currentChatId=this.value;loadChat()}});
 document.getElementById('msgSelect').addEventListener('change',function(){if(this.value){currentMsgId=this.value;loadMsgChat()}});
-document.getElementById('sendBtn').addEventListener('click',()=>{const i=document.getElementById('chatInput'),t=i.value.trim();if(!t)return;i.value='';i.style.height='auto';sendChat(t)});
-document.getElementById('msgSendBtn').addEventListener('click',()=>{const i=document.getElementById('msgInput'),t=i.value.trim();if(!t)return;i.value='';i.style.height='auto';sendRemote(t)});
+
+document.getElementById('sendBtn').addEventListener('click',()=>{
+  const i=document.getElementById('chatInput'),t=i.value.trim();
+  if(!t||sending)return;i.value='';i.style.height='auto';sendChat(t);
+});
+document.getElementById('msgSendBtn').addEventListener('click',()=>{
+  const i=document.getElementById('msgInput'),t=i.value.trim();
+  if(!t||sending)return;i.value='';i.style.height='auto';sendRemote(t);
+});
 document.getElementById('chatInput').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();document.getElementById('sendBtn').click()}});
 document.getElementById('msgInput').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();document.getElementById('msgSendBtn').click()}});
 [document.getElementById('chatInput'),document.getElementById('msgInput')].forEach(el=>{if(el)el.addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'})});
 
+// 快捷动作按钮
 document.querySelectorAll('[data-act]').forEach(btn=>{btn.addEventListener('click',()=>{
   if(!currentChatId)return alert('选择NPC');
   const npc=state.npcs.find(n=>n.id===currentChatId);if(!npc)return;
   const act=btn.dataset.act;
-  const map={'调情':`*暧昧打量${npc.name}* 你今天格外诱人。`,'双修':`*握住${npc.name}的手* 来双修吧。`,'强制播种':`*灵力暴涌* ${npc.name}，乖乖受孕。*播种术法灌入*`,'查看身体状况':`*灵识探入${npc.name}体内* 让我看看。`,'拥入怀中':`*将${npc.name}拉入怀中* 让我抱会儿。`,'切磋':`*拔剑* ${npc.name}，切磋？`,'喂丹药':`*捏住${npc.name}下巴* 乖，吃药。`};
-  if(act==='强制播种'&&!state.pregnancies[currentChatId]?.active){state.pregnancies[currentChatId]={active:true,days:1,stage:'初期'};addEvent('大事',`对${npc.name}播种！`);save()}
+  const map={
+    '撒娇':`*拉住${npc.name}的衣袖，仰头看着对方* 哼，你都不理我…`,
+    '牵手':`*悄悄伸出手，牵住${npc.name}的手* …走吧。`,
+    '依偎':`*轻轻靠在${npc.name}肩上* 就让我靠一会儿…`,
+    '送花':`*从身后拿出一朵灵花递过去* 送你的~`,
+    '亲亲':`*踮起脚尖，在${npc.name}脸上轻轻一吻* ……嘿嘿。`,
+    '切磋':`*拔出灵剑* ${npc.name}，来切磋一下？`,
+    '喂丹药':`*拿出一颗丹药递到${npc.name}嘴边* 乖，吃药~`,
+    '查看状态':`*灵识轻轻探向${npc.name}* 让我看看你的状态~`
+  };
   if(act==='喂丹药'&&state.pills.length>0){state.pills.shift();save();updatePills()}
-  sendChat(map[act]||act)})});
+  sendChat(map[act]||act);
+})});
 
 document.querySelectorAll('[data-msg-act]').forEach(btn=>{btn.addEventListener('click',()=>{
   if(!currentMsgId)return alert('选择传讯对象');
   const npc=state.npcs.find(n=>n.id===currentMsgId);if(!npc)return;
   const act=btn.dataset.msgAct;
-  const map={'想你了':`${npc.name}，想你了…`,'速来':`${npc.name}，速来！`,'报平安':`${npc.name}，一切安好。`,'邀请闯秘境':`${npc.name}，一起闯秘境？`};
-  sendRemote(map[act]||act)})});
+  const map={
+    '想你了':`${npc.name}…想你了，你在做什么呀？`,
+    '在干嘛':`${npc.name}～你现在在干嘛呀？`,
+    '快来找我':`${npc.name}，快来找我嘛！`,
+    '一起闯秘境吧':`${npc.name}，我发现了一处秘境，一起去探探？`
+  };
+  sendRemote(map[act]||act);
+})});
 
+// 弹窗关闭
 document.querySelectorAll('.modal-mask').forEach(m=>{m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')})});
 
-loadSettings();refreshAll();
-setInterval(()=>{if(state.player.mp<state.player.maxMp){state.player.mp=Math.min(state.player.maxMp,state.player.mp+5);save();updatePlayerUI()}},30000);
+// ========== 定时器 ==========
+// 灵力恢复（30秒）
+setInterval(()=>{
+  if(state.player.mp<state.player.maxMp){
+    state.player.mp=Math.min(state.player.maxMp,state.player.mp+5);
+    save();updatePlayerUI();
+  }
+},30000);
+
+// NPC自主行为+八卦（1小时）
+setInterval(()=>{
+  npcAutonomyTick();
+  npcGossipTick();
+  loveDecayTick();
+},3600000);
+
+// 随机事件（90秒30%概率）
+setInterval(()=>{
+  if(Math.random()<0.3&&state.npcs.length>0){
+    // 30%概率是情敌事件，70%普通事件
+    if(Math.random()<0.3&&state.npcs.length>0){
+      triggerRivalEvent();
+    }else{
+      triggerRandomEvent();
+    }
+  }
+},90000);
+
+// ========== 初始化 ==========
+loadSettings();
+refreshAll();
+// 初始化所有NPC的社交圈
+state.npcs.forEach(n=>ensureSocialCircle(n.id));
+
+// ========== NPC社交网系统 ==========
+// 路人修士名字库
+const RANDOM_NAMES_MALE=['沈清辞','顾长歌','萧无衍','裴渊','楚夜辰','温如玉','凌霄','白子墨','叶知秋','苏慕白','江晚吟','陆九渊','谢无期','柳随风','宋明澈'];
+const RANDOM_NAMES_FEMALE=['云绾绾','柳如烟','苏挽月','沈星落','顾清欢','花千骨','凤九','白浅','洛璃','姜雨晴','林婉儿','慕容紫英','上官婉儿','萧薰儿','纳兰嫣然'];
+const FRIEND_ACTIVITIES=['喝茶','切磋剑法','一起炼丹','逛坊市','讨论功法','赏花','下棋','一起修炼','闲聊','品酒'];
+const AMBIGUOUS_ACTIVITIES=['月下散步','并肩看星星','互喂灵果','靠在肩上小憩','牵手逛夜市','对视发呆','整理衣领','擦拭嘴角'];
+
+// 初始化NPC社交圈
+function ensureSocialCircle(npcId){
+  if(!state.socialNet)state.socialNet={};
+  if(!state.socialNet[npcId]){
+    const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return;
+    const pool=npc.gender==='女'?RANDOM_NAMES_MALE:RANDOM_NAMES_FEMALE;
+    const mixed=npc.gender==='女'?RANDOM_NAMES_FEMALE:RANDOM_NAMES_MALE;
+    // 生成2-4个好友
+    const friends=[];
+    const count=2+Math.floor(Math.random()*3);
+    const used=new Set();
+    for(let i=0;i<count;i++){
+      const fromPool=Math.random()<0.7?pool:mixed;
+      let name;
+      do{name=fromPool[Math.floor(Math.random()*fromPool.length)]}while(used.has(name));
+      used.add(name);
+      friends.push({
+        name,
+        gender:pool.includes(name)?( npc.gender==='女'?'男':'女'):(npc.gender==='女'?'女':'男'),
+        realm:REALMS[2+Math.floor(Math.random()*5)],
+        relation:Math.random()<0.15?'暧昧':'好友', // 15%概率有暧昧好友
+        closeness:Math.floor(Math.random()*60)+20 // 20-80亲密度
+      });
+    }
+    state.socialNet[npcId]={friends,rivals:[],lastGossip:0};
+    save();
+  }
+  return state.socialNet[npcId];
+}
+
+// 生成NPC当前活动场景（查岗用）
+function generateNpcScene(npcId){
+  const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return null;
+  const social=ensureSocialCircle(npcId);
+  const rel=state.relations[npcId]||{love:0,type:'陌生人'};
+  const roll=Math.random();
+  
+  // 独处
+  if(roll<0.3||!social.friends.length){
+    const soloActs=['独自修炼','在洞府看书','对着月亮发呆','在炼丹','整理法器',
+      rel.love>=60?`看着你送的灵花发呆`:'',
+      rel.love>=70?`翻看和你的传讯记录`:'',
+      rel.love>=80?`抱着你留下的外衣入睡`:''].filter(Boolean);
+    return {type:'solo',desc:soloActs[Math.floor(Math.random()*soloActs.length)]};
+  }
+  
+  // 跟好友在一起
+  if(roll<0.7){
+    const friend=social.friends[Math.floor(Math.random()*social.friends.length)];
+    const act=FRIEND_ACTIVITIES[Math.floor(Math.random()*FRIEND_ACTIVITIES.length)];
+    return {type:'friend',friend,activity:act,desc:`正在和${friend.name}（${friend.gender}·${friend.realm}·${friend.relation}）${act}`};
+  }
+  
+  // 跟暧昧对象在一起（修罗场！）
+  const ambFriends=social.friends.filter(f=>f.relation==='暧昧');
+  if(ambFriends.length&&roll<0.85){
+    const friend=ambFriends[Math.floor(Math.random()*ambFriends.length)];
+    const act=AMBIGUOUS_ACTIVITIES[Math.floor(Math.random()*AMBIGUOUS_ACTIVITIES.length)];
+    return {type:'ambiguous',friend,activity:act,desc:`正在和${friend.name}（${friend.gender}·${friend.realm}）${act}`,suspicious:true};
+  }
+  
+  // 被搭讪
+  if(roll<0.95){
+    const isOppGender=npc.gender==='女'?RANDOM_NAMES_MALE:RANDOM_NAMES_FEMALE;
+    const stranger=isOppGender[Math.floor(Math.random()*isOppGender.length)];
+    return {type:'approached',stranger,desc:`被一个叫${stranger}的修士搭讪中`,suspicious:true};
+  }
+  
+  return {type:'solo',desc:'在洞府修炼'};
+}
+
+// 增强版查岗（替换原来的viewStatus里的callAIModal）
+async function enhancedCheck(id){
+  const npc=state.npcs.find(n=>n.id===id);if(!npc)return;
+  const scene=generateNpcScene(id);
+  const rel=state.relations[id]||{love:0};
+  
+  document.getElementById('checkTitle').textContent=`🔍 偷看${npc.name}`;
+  const el=document.getElementById('checkContent');
+  document.getElementById('checkModal').classList.add('show');
+  
+  // 先显示场景
+  let sceneHtml=`<div style="padding:10px;background:rgba(160,112,224,.06);border:1px solid rgba(160,112,224,.12);border-radius:8px;margin-bottom:12px">`;
+  sceneHtml+=`<div style="font-size:11px;color:var(--dim)">你悄悄探出灵识…</div>`;
+  sceneHtml+=`<div style="font-size:13px;margin-top:6px;color:var(--text)">${npc.name}${scene.desc}</div>`;
+  
+  if(scene.suspicious){
+    sceneHtml+=`<div style="margin-top:8px;color:var(--danger);font-size:11px">⚠️ 看起来有点可疑…</div>`;
+  }
+  sceneHtml+=`</div>`;
+  
+  // 选项
+  let choicesHtml='<div style="display:flex;flex-direction:column;gap:6px">';
+  if(scene.type==='ambiguous'||scene.type==='approached'){
+    choicesHtml+=`<button class="event-choice" onclick="checkConfront('${id}','${scene.friend?.name||scene.stranger}')">😤 冲过去质问</button>`;
+    choicesHtml+=`<button class="event-choice" onclick="checkWatch('${id}','${scene.friend?.name||scene.stranger}')">👀 继续偷看</button>`;
+    choicesHtml+=`<button class="event-choice" onclick="checkLeave('${id}')">😢 默默离开</button>`;
+  }else if(scene.type==='friend'){
+    choicesHtml+=`<button class="event-choice" onclick="checkJoin('${id}','${scene.friend.name}')">👋 过去打招呼</button>`;
+    choicesHtml+=`<button class="event-choice" onclick="checkWatch('${id}','${scene.friend.name}')">👀 继续偷看</button>`;
+    choicesHtml+=`<button class="event-choice" onclick="checkLeave('${id}')">🚶 不打扰了</button>`;
+  }else{
+    choicesHtml+=`<button class="event-choice" onclick="checkSurprise('${id}')">🎉 突然出现吓ta</button>`;
+    choicesHtml+=`<button class="event-choice" onclick="checkWatch('${id}','')">👀 继续偷看</button>`;
+    choicesHtml+=`<button class="event-choice" onclick="checkLeave('${id}')">🚶 不打扰了</button>`;
+  }
+  choicesHtml+='</div>';
+  
+  el.innerHTML=sceneHtml+choicesHtml+'<div id="checkAIResult" style="margin-top:12px"></div>';
+}
+
+async function checkConfront(npcId,rivalName){
+  const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return;
+  const rel=state.relations[npcId];
+  const el=document.getElementById('checkAIResult');
+  document.querySelectorAll('#checkContent .event-choice').forEach(b=>b.disabled=true);
+  
+  addEvent('修罗场',`你冲过去质问${npc.name}和${rivalName}的关系！`);
+  
+  // 根据好感决定结果
+  const prompt=`*${state.player.name}突然出现，看到你和${rivalName}在一起，表情不太好看*\n"${npc.name}，你在干什么？这个${rivalName}是谁？"\n（请根据好感度${rel.love}和你的性格回应。好感高则解释安慰，好感低则可能不耐烦。要描写${rivalName}的反应。）`;
+  
+  if(!state.chatHistories[npcId])state.chatHistories[npcId]=[];
+  state.chatHistories[npcId].push({role:'user',content:prompt});
+  
+  await callAIModal(npc,'face',el);
+  
+  // 好感变化
+  if(rel.love>=70){rel.love=Math.min(100,rel.love+3);floatNum('❤️+3（解释清楚了）','var(--green)',window.innerWidth/2,window.innerHeight*0.3)}
+  else if(rel.love>=40){floatNum('😅 有点尴尬','var(--orange)',window.innerWidth/2,window.innerHeight*0.3)}
+  else{rel.love=Math.max(0,rel.love-5);floatNum('💔-5（嫌你多管闲事）','var(--danger)',window.innerWidth/2,window.innerHeight*0.3)}
+  save();refreshAll();
+}
+
+async function checkWatch(npcId,targetName){
+  const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return;
+  const el=document.getElementById('checkAIResult');
+  document.querySelectorAll('#checkContent .event-choice').forEach(b=>b.disabled=true);
+  
+  const prompt=targetName?
+    `（第三人称描述${npc.name}和${targetName}接下来的互动。200字。要有细节和对话。如果${targetName}对${npc.name}有暧昧举动，描写${npc.name}的反应。）`:
+    `（第三人称描述${npc.name}独处时的样子。200字。要有内心活动。）`;
+  
+  await callAIModal(npc,'status',el);
+}
+
+async function checkJoin(npcId,friendName){
+  const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return;
+  const rel=state.relations[npcId];
+  const el=document.getElementById('checkAIResult');
+  document.querySelectorAll('#checkContent .event-choice').forEach(b=>b.disabled=true);
+  
+  const prompt=`*${state.player.name}走过来打招呼* "嗨~你们在干嘛呀？"\n（${npc.name}看到${state.player.name}来了，根据好感度${rel.love}反应。同时描写${friendName}的反应。）`;
+  
+  if(!state.chatHistories[npcId])state.chatHistories[npcId]=[];
+  state.chatHistories[npcId].push({role:'user',content:prompt});
+  
+  await callAIModal(npc,'face',el);
+  rel.love=Math.min(100,rel.love+2);
+  floatNum('❤️+2','var(--pink)',window.innerWidth/2,window.innerHeight*0.3);
+  save();refreshAll();
+}
+
+async function checkSurprise(npcId){
+  const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return;
+  const rel=state.relations[npcId];
+  const el=document.getElementById('checkAIResult');
+  document.querySelectorAll('#checkContent .event-choice').forEach(b=>b.disabled=true);
+  
+  const prompt=`*${state.player.name}突然从背后出现，捂住${npc.name}的眼睛* "猜猜我是谁～"`;
+  
+  if(!state.chatHistories[npcId])state.chatHistories[npcId]=[];
+  state.chatHistories[npcId].push({role:'user',content:prompt});
+  
+  await callAIModal(npc,'face',el);
+  if(rel.love>=50){rel.love=Math.min(100,rel.love+3);floatNum('❤️+3','var(--pink)',window.innerWidth/2,window.innerHeight*0.3)}
+  else{rel.love=Math.max(0,rel.love-2);floatNum('💔-2（被吓到了）','var(--danger)',window.innerWidth/2,window.innerHeight*0.3)}
+  save();refreshAll();
+}
+
+function checkLeave(npcId){
+  const el=document.getElementById('checkAIResult');
+  document.querySelectorAll('#checkContent .event-choice').forEach(b=>b.disabled=true);
+  el.innerHTML='<div style="color:var(--dim);font-size:11px;padding:8px">你默默收回灵识，转身离开了…</div>';
+  addEvent('查岗','你偷看了一眼就走了');
+}
+
+// ========== 情敌系统 ==========
+const RIVAL_EVENTS=[
+  {title:'💐 有人送花',template:(npc,rival)=>`你收到消息：有个叫${rival}的${npc.gender==='女'?'男':'女'}修士给${npc.name}送了一束灵花！`},
+  {title:'💌 情书',template:(npc,rival)=>`${npc.name}收到了${rival}的表白信！据说写得很肉麻…`},
+  {title:'🍵 邀约',template:(npc,rival)=>`${rival}邀请${npc.name}去品茶，${npc.name}似乎在犹豫要不要去…`},
+  {title:'🌙 夜访',template:(npc,rival)=>`深夜，${rival}出现在${npc.name}的洞府门口…`},
+  {title:'💪 英雄救美',template:(npc,rival)=>`${npc.name}在外遇险，${rival}恰好路过出手相救！`},
+  {title:'🎁 重礼',template:(npc,rival)=>`${rival}送了${npc.name}一件珍贵法器，据说价值连城…`}
+];
+
+function triggerRivalEvent(){
+  if(!state.npcs.length)return;
+  // 选一个NPC
+  const candidates=state.npcs.filter(n=>{
+    const rel=state.relations[n.id];
+    return rel&&rel.love<85; // 好感85以上不会被撬
+  });
+  if(!candidates.length)return;
+  
+  const npc=candidates[Math.floor(Math.random()*candidates.length)];
+  const rel=state.relations[npc.id];
+  const social=ensureSocialCircle(npc.id);
+  
+  // 生成情敌
+  const rivalPool=npc.gender==='女'?RANDOM_NAMES_MALE:RANDOM_NAMES_FEMALE;
+  let rivalName;
+  // 优先从暧昧好友里选
+  const ambFriend=social.friends.find(f=>f.relation==='暧昧');
+  if(ambFriend&&Math.random()<0.6){
+    rivalName=ambFriend.name;
+  }else{
+    rivalName=rivalPool[Math.floor(Math.random()*rivalPool.length)];
+  }
+  
+  const evt=RIVAL_EVENTS[Math.floor(Math.random()*RIVAL_EVENTS.length)];
+  const desc=evt.template(npc,rivalName);
+  
+  // 记录情敌
+  if(!social.rivals.includes(rivalName))social.rivals.push(rivalName);
+  save();
+  
+  showEventModal({
+    title:`⚡ ${evt.title}`,
+    desc:desc,
+    choices:[
+      {text:'😤 立刻去找ta！',action:()=>{
+        rivalConfront(npc.id,rivalName);
+      }},
+      {text:`📨 传讯问${npc.name}`,action:()=>{
+        rivalAsk(npc.id,rivalName);
+      }},
+      {text:'😒 装作不知道',action:()=>{
+        // 好感可能降低
+        if(rel.love>=50&&Math.random()<0.3){
+          rel.love=Math.max(0,rel.love-3);
+          floatNum('💔-3（ta有点失望你不在意）','var(--danger)',window.innerWidth/2,window.innerHeight*0.3);
+        }
+        addEvent('情敌',`你无视了${rivalName}对${npc.name}的追求`);
+        save();refreshAll();
+      }}
+    ]
+  });
+}
+
+async function rivalConfront(npcId,rivalName){
+  const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return;
+  const rel=state.relations[npcId];
+  
+  addEvent('修罗场',`你去找${rivalName}理论！`);
+  startChat(npcId);
+  
+  const confrontText=`*你找到${npc.name}，发现${rivalName}也在。你走上前，挡在${npc.name}面前，冷冷看着${rivalName}*\n"${rivalName}是吧？离${npc.name}远点。"`;
+  
+  await sendChat(confrontText);
+  
+  // 好感变化取决于当前关系
+  if(rel.love>=60){
+    rel.love=Math.min(100,rel.love+5);
+    floatNum('❤️+5（被你护住很开心）','var(--pink)',window.innerWidth/2,window.innerHeight*0.3);
+    screenFlash('var(--pink)','');
+  }else if(rel.love>=30){
+    rel.love=Math.min(100,rel.love+2);
+    floatNum('❤️+2（有点意外）','var(--pink)',window.innerWidth/2,window.innerHeight*0.3);
+  }else{
+    floatNum('😅（觉得你莫名其妙）','var(--orange)',window.innerWidth/2,window.innerHeight*0.3);
+  }
+  save();refreshAll();
+}
+
+async function rivalAsk(npcId,rivalName){
+  const npc=state.npcs.find(n=>n.id===npcId);if(!npc)return;
+  
+  currentMsgId=npcId;
+  document.getElementById('msgSelect').value=npcId;
+  switchPage('interact');
+  // 切到传讯tab
+  document.querySelector('[data-sub="msg"]').click();
+  loadMsgChat();
+  
+  const askText=`${npc.name}…我听说${rivalName}对你…你们什么关系？`;
+  await sendRemote(askText);
+}
+
+// ========== NPC八卦系统 ==========
+function npcGossipTick(){
+  if(state.npcs.length<2)return;
+  
+  state.npcs.forEach(npc=>{
+    const rel=state.relations[npc.id];if(!rel||rel.love<40)return;
+    if(Math.random()>0.2)return; // 20%概率八卦
+    
+    // 找另一个NPC
+    const others=state.npcs.filter(n=>n.id!==npc.id&&(state.relations[n.id]?.love||0)>=30);
+    if(!others.length)return;
+    const other=others[Math.floor(Math.random()*others.length)];
+    const otherRel=state.relations[other.id];
+    
+    const gossips=[
+      `${npc.name}传讯问你："你和${other.name}…是什么关系？"`,
+      `${npc.name}说："我今天碰到${other.name}了，ta问了好多关于你的事…"`,
+      `${npc.name}酸溜溜地说："听说你最近和${other.name}走得很近？"`,
+      rel.love>=70?`${npc.name}小声说："${other.name}是不是也喜欢你…我有点不安。"`:'',
+      otherRel.love>=60?`${npc.name}说："${other.name}好像对你有意思，你知道吗？"`:'',
+    ].filter(Boolean);
+    
+    if(!gossips.length)return;
+    const msg=gossips[Math.floor(Math.random()*gossips.length)];
+    
+    if(!state.msgHistories[npc.id])state.msgHistories[npc.id]=[];
+    state.msgHistories[npc.id].push({role:'assistant',content:msg});
+    
+    showToast(`📨 ${npc.name}：${msg.slice(0,25)}…`,()=>{
+      currentMsgId=npc.id;
+      document.getElementById('msgSelect').value=npc.id;
+      switchPage('interact');
+      document.querySelector('[data-sub="msg"]').click();
+      loadMsgChat();
+    });
+    document.getElementById('notifChat').style.display='block';
+    addEvent('八卦',msg);
+    save();
+  });
+}
+
+// ========== NPC好感衰减（不理会就会降） ==========
+function loveDecayTick(){
+  state.npcs.forEach(npc=>{
+    const rel=state.relations[npc.id];if(!rel)return;
+    // 好感50以上，长时间不互动会缓慢降低
+    if(rel.love>50&&state.lastTalkTo!==npc.id){
+      if(Math.random()<0.15){
+        rel.love=Math.max(40,rel.love-1);
+      }
+    }
+  });
+  save();refreshAll();
+}
 </script>
 </body>
 </html>
