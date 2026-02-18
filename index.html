@@ -264,6 +264,11 @@ const REALMS_DB=[{name:'落霞秘境',level:0,desc:'入门，灵草遍地',rewar
 
 let state=D.get('state',{player:{name:'无名散修',gender:'男',realm:'凡人',desc:'',hp:100,maxHp:100,mp:50,maxMp:50,exp:0,maxExp:100},api:{url:'',key:'',model:'gpt-4o',maxTokens:2048},worldSetting:'',npcs:[],relations:{},chatHistories:{},msgHistories:{},events:[],pregnancies:{},pills:[],lastTalkTo:null});
 function save(){D.set('state',state)}
+function getApiUrl(){
+  let u=state.api.url.trim().replace(/\/+$/,'');
+  if(!u.endsWith('/chat/completions'))u+='/chat/completions';
+  return u;
+}
 
 // ========== 提示词 ==========
 function buildSys(npc,mode){
@@ -389,7 +394,8 @@ async function callAI(npc,history,mode,box,onDone){
   ld.innerHTML=`<div class="ms">${npc.name}</div><span style="color:var(--dim)">回应中…</span>`;
   box.appendChild(ld);box.scrollTop=box.scrollHeight;
   try{
-    const r=await fetch(state.api.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.api.key},body:JSON.stringify({model:state.api.model,messages:msgs,max_tokens:parseInt(state.api.maxTokens)||2048,temperature:.85})});
+   const r=await fetch(getApiUrl(),{method:'POST',
+   headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.api.key},body:JSON.stringify({model:state.api.model,messages:msgs,max_tokens:parseInt(state.api.maxTokens)||2048,temperature:.85})});
     if(!r.ok)throw new Error(r.status+' '+r.statusText);
     const d=await r.json(),reply=d.choices?.[0]?.message?.content||'（无回应）';
     ld.innerHTML=`<div class="ms">${npc.name}</div>${esc(reply)}`;
@@ -404,7 +410,8 @@ async function callAIModal(npc,mode,el){
   const prompt=mode==='status'?'描述你此刻的状态和内心想法。':mode==='npc-check'?`*${npc.name}突然出现在${state.player.name}面前查岗*`:`*${state.player.name}突然出现查看${npc.name}在做什么*`;
   const msgs=[{role:'system',content:buildSys(npc,mode)},{role:'user',content:prompt}];
   try{
-    const r=await fetch(state.api.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.api.key},body:JSON.stringify({model:state.api.model,messages:msgs,max_tokens:parseInt(state.api.maxTokens)||2048,temperature:.85})});
+    const r=await fetch(getApiUrl(),{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.api.key},body:JSON.stringify({model:state.api.model,messages:msgs,max_tokens:parseInt(state.api.maxTokens)||2048,temperature:.85})});
     if(!r.ok)throw new Error(r.status);
     const d=await r.json(),reply=d.choices?.[0]?.message?.content||'（无回应）';
     el.innerHTML=esc(reply);parseReply(npc.id,reply);save();refreshAll();
